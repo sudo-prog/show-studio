@@ -31,7 +31,7 @@ export default function ProductViewer({
   
   // Load the front texture (or active view texture)
   const activeViewData = views[activeView]
-  const texturePath = `/public/${categoryPath}/${product.id}/${activeViewData.file}.webp?v=6`
+  const texturePath = `/${categoryPath}/${product.id}/${activeViewData.file}.webp?v=6`
   const texture = useTexture(texturePath)
   
   // Auto-rotate when selected
