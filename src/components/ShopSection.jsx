@@ -91,6 +91,7 @@ export default function ShopSection({
           views={category === 'shoes' ? SECTION_VIEWS.shoes : SECTION_VIEWS.default}
           position={productPositions[i].position}
           rotation={productPositions[i].rotation}
+          sectionRotationY={rotationY}
           isSelected={selectedProduct?.id === product.id}
           isHovered={hoveredProduct?.id === product.id}
           onSelect={() => onSelect(product)}

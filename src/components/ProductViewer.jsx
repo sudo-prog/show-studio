@@ -16,12 +16,13 @@ export default function ProductViewer({
   product, 
   category, 
   views,
-  position,
+  position, 
   rotation,
-  isSelected,
-  isHovered,
-  onSelect,
-  onHover,
+  sectionRotationY,
+  isSelected, 
+  isHovered, 
+  onSelect, 
+  onHover, 
   onHoverEnd,
 }) {
   const groupRef = useRef()
@@ -84,9 +85,10 @@ export default function ProductViewer({
         <meshStandardMaterial map={texture} transparent />
       </mesh>
       
-      {/* Product label */}
+      {/* Product label - counter-rotate to always face camera */}
       <Text
         position={[0, -0.6, 0]}
+        rotation-y={-(sectionRotationY || 0)}
         fontSize={0.12}
         color="#111"
         anchorX="center"
@@ -97,6 +99,7 @@ export default function ProductViewer({
       
       <Text
         position={[0, -0.75, 0]}
+        rotation-y={-(sectionRotationY || 0)}
         fontSize={0.1}
         color="#5f5d58"
         anchorX="center"
