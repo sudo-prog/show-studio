@@ -1,22 +1,26 @@
-# Maestro flow: Bottom Nav Order Verification
+# Maestro flow: Bottom Nav Order Verification (Web)
 # Matches original Nike Virtual Store navigation order exactly:
 # Store / Clothing / Caps / Bags / Shoes / i
 appId: com.showstudio.web
-url: https://show-studio-seven.vercel.app
+url: http://show-studio-seven.vercel.app
+viewport:
+  width: 390
+  height: 844
+tags: [smoke, nav]
 ---
+
+- launchApp:
+    url: http://show-studio-seven.vercel.app
 
 - extendedWaitUntil:
     visible: "NIKE"
     timeout: 15000
 
-- waitfor:
-    timeout: 5000
-
-# Tap in center to dismiss splash
+# Dismiss splash by tapping center
 - tapOn:
     point: 50%, 90%
 
-# Scroll bottom bar into view if needed
+# Scroll bottom bar into view
 - scrollUntilVisible:
     element:
       text: "Store"
@@ -24,15 +28,12 @@ url: https://show-studio-seven.vercel.app
     timeout: 10000
 
 # Verify exact nav order: Store, Clothing, Caps, Bags, Shoes
-- assertVisible:
-    text: "Store"
-- assertVisible:
-    text: "Clothing"
-- assertVisible:
-    text: "Caps"
-- assertVisible:
-    text: "Bags"
-- assertVisible:
-    text: "Shoes"
-- assertVisible:
-    text: "i"
+- assertVisible: "Store"
+- assertVisible: "Clothing"
+- assertVisible: "Caps"
+- assertVisible: "Bags"
+- assertVisible: "Shoes"
+
+# Verify info button exists (icon-only, use JS)
+- assertTrue:
+    condition: "document.querySelector('[aria-label=\"How to explore virtual store\"]') !== null"

@@ -1,57 +1,57 @@
-# Maestro flow: Touch momentum and snap-back test
+# Maestro flow: Touch momentum and snap-back (Web)
 # Verifies that product 360° drag has momentum after release
 # and spring snaps back to nearest quadrant
 appId: com.showstudio.web
-url: https://show-studio-seven.vercel.app
+url: http://show-studio-seven.vercel.app
+viewport:
+  width: 390
+  height: 844
 tags: [touch, momentum, snap]
 ---
+
+- launchApp:
+    url: http://show-studio-seven.vercel.app
 
 - extendedWaitUntil:
     visible: "NIKE"
     timeout: 15000
 
-- waitfor:
-    timeout: 5000
-
 # Dismiss splash
 - tapOn:
     point: 50%, 90%
 
-# Go to Caps section - caps have simple front/side/back views
+# Go to Caps section - simpler 3-view product
 - tapOn:
     text: "Caps"
-
-# Allow section to load
-- waitfor:
-    timeout: 3000
 
 # Tap on a product to open modal
 - tapOn:
     point: 50%, 50%
 
 # Verify modal opened
-- extendedWaitUntil:
-    text: "Drag to turn 360°"
-    timeout: 8000
+- assertTrue:
+    condition: "document.querySelector('.fixed.inset-0.z-50') !== null"
+
+# Verify the 360° turn stage hint is visible
+- assertVisible: "Drag to turn 360°"
 
 # Perform a horizontal swipe on the turn stage to trigger drag
-# This tests the touch interaction area
+# This tests the touch interaction area (product image area)
 - swipe:
     start: 30%, 60%
     end: 70%, 60%
     duration: 500
 
-# Wait for momentum to decay and snap-back
-- waitfor:
-    timeout: 4000
+# Wait for momentum to decay and snap-back using extendedWaitUntil
+- extendedWaitUntil:
+    visible: "Drag to turn 360°"
+    timeout: 5000
 
-# Verify the product image is still visible (snapped back)
-- assertVisible:
-    element:
-      className: "object-contain"
+# Verify the product image is still visible (snapped back to nearest quadrant)
+- assertTrue:
+    condition: "document.querySelector('.object-contain') !== null"
 
 # Close modal
 - tapOn:
     point: 90%, 10%
-- assertNotVisible:
-    text: "Drag to turn 360°"
+- assertNotVisible: "Drag to turn 360°"

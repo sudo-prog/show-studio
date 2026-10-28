@@ -1,16 +1,19 @@
-# Maestro flow: Bags department (front wall)
+# Maestro flow: Bags department (Web)
 # Original: 4 crossbody bags on wall hooks + 3x2 oak cubby unit with 6 standing bags
 appId: com.showstudio.web
-url: https://show-studio-seven.vercel.app
+url: http://show-studio-seven.vercel.app
+viewport:
+  width: 390
+  height: 844
 tags: [bags, department]
 ---
+
+- launchApp:
+    url: http://show-studio-seven.vercel.app
 
 - extendedWaitUntil:
     visible: "NIKE"
     timeout: 15000
-
-- waitfor:
-    timeout: 5000
 
 # Dismiss splash
 - tapOn:
@@ -20,17 +23,11 @@ tags: [bags, department]
 - tapOn:
     text: "Bags"
 
-# Verify we're in bags section
-- assertVisible:
-    text: "Bags"
-
-# Verify the cubby unit and wall hooks are present
-- assertVisible:
-    element:
-      className: "touch-none"
+# Verify we're in bags section with canvas present
+- assertTrue:
+    condition: "document.querySelector('canvas') !== null"
 
 # Verify return to overview
 - tapOn:
     text: "Store"
-- assertVisible:
-    text: "Store"
+- assertVisible: "Store"

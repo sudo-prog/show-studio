@@ -9,7 +9,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "test:e2e": "node e2e/mobile-smoke.mjs",
+    "test:maestro": "maestro test e2e/maestro/flows",
+    "test:maestro:nav": "maestro test e2e/maestro/flows/nav-order.yaml --web-url https://show-studio-seven.vercel.app"
   },
   "dependencies": {
     "@react-spring/web": "^10.1.2",

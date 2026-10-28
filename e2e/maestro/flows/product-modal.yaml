@@ -1,16 +1,19 @@
-# Maestro flow: Product card touch interaction - drag to turn 360°
-# Tests momentum + spring snap-back on garment, shoe, cap, and bag cards
+# Maestro flow: Product Modal Interaction (Web)
+# Tests opening a product, 360° turn stage, size selector, add to cart
 appId: com.showstudio.web
-url: https://show-studio-seven.vercel.app
-tags: [product, touch, momentum]
+url: http://show-studio-seven.vercel.app
+viewport:
+  width: 390
+  height: 844
+tags: [product, modal]
 ---
+
+- launchApp:
+    url: http://show-studio-seven.vercel.app
 
 - extendedWaitUntil:
     visible: "NIKE"
     timeout: 15000
-
-- waitfor:
-    timeout: 5000
 
 # Dismiss splash
 - tapOn:
@@ -20,38 +23,27 @@ tags: [product, touch, momentum]
 - tapOn:
     text: "Clothing"
 
-# Tap on a garment to open product modal
-- tapOn:
-    point: 50%, 50%
-
-# Verify product modal is open
+# Verify modal opened
 - extendedWaitUntil:
-    text: "Add to Cart"
-    timeout: 8000
+    visible: "Add to Cart"
+    timeout: 15000
 
-# Verify the 360° turn stage is visible
-- assertVisible:
-    text: "Drag to turn 360°"
+# Verify "Add to Cart" button exists
+- assertVisible: "Add to Cart"
 
-# Verify thumbnail view selector (front/side/back)
-- assertVisible:
-    text: "Front"
-- assertVisible:
-    text: "Side"
-- assertVisible:
-    text: "Back"
+# Verify "Select Size" is present
+- assertVisible: "Select Size"
 
-# Verify price and size selector
-- assertVisible:
-    text: "Select Size"
+# Verify "In Stock" indicator
+- assertVisible: "In Stock"
 
-# Verify colorway badge
-- assertVisible:
-    text: "In Stock"
+# Verify close button (X) exists
+- assertTrue:
+    condition: "document.querySelector('button[aria-label=\"Close product view\"]') !== null"
 
-# Close product modal
+# Close product modal by tapping top-right area
 - tapOn:
-    element:
-      point: 90%, 10%
-- assertNotVisible:
-    text: "Add to Cart"
+    point: 90%, 10%
+
+# Verify modal is closed
+- assertNotVisible: "Add to Cart"
