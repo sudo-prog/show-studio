@@ -2,7 +2,8 @@ import React, { useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { Product } from '../../types/store';
-import { damp, getGarmentCardPose } from '../../utils/math3d';
+import { damp, getGarmentCardPose, POSITION_DAMPING, ROTATION_DAMPING, HOVER_LIFT } from '../../utils/math3d';
+import { getTextureUrl } from '../../utils/textures';
 
 interface PhotoGarmentProps {
   product: Product;
@@ -35,9 +36,9 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
   // Textures for front, side, and back views
   const textures = useMemo(() => {
     const loader = new THREE.TextureLoader();
-    const frontTex = loader.load(product.views.front.imageUrl);
-    const sideTex = loader.load(product.views.side.imageUrl);
-    const backTex = loader.load(product.views.back.imageUrl);
+    const frontTex = loader.load(getTextureUrl(product.category, product.id, 'front'));
+    const sideTex = loader.load(getTextureUrl(product.category, product.id, 'side'));
+    const backTex = loader.load(getTextureUrl(product.category, product.id, 'back'));
 
     [frontTex, sideTex, backTex].forEach((t) => {
       t.colorSpace = THREE.SRGBColorSpace;
@@ -63,23 +64,23 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
     const dt = Math.min(delta, 0.05);
 
     // Vertical lift when hovered or dragging
-    const targetLift = isHovered || isDragging ? 0.04 : 0;
-    currentLift.current = damp(currentLift.current, targetLift, 12.0, dt);
+    const targetLift = isHovered || isDragging ? HOVER_LIFT : 0;
+    currentLift.current = damp(currentLift.current, targetLift, POSITION_DAMPING, dt);
     cardRef.current.position.y = currentLift.current;
 
     if (!isDragging) {
       const targetAngle = isHovered ? 0 : -1.35;
-      currentAngle.current = damp(currentAngle.current, targetAngle, 12.0, dt);
+      currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
     }
 
     const targetX = baseX + slideOffset;
-    currentX.current = damp(currentX.current, targetX, 14.0, dt);
+    currentX.current = damp(currentX.current, targetX, POSITION_DAMPING + 1, dt);
     groupRef.current.position.x = currentX.current;
 
     const swayAmplitude = isHovered || isDragging ? 0.025 : 0.012;
     const swaySpeed = isHovered || isDragging ? 3.5 : 1.8;
     const targetSway = Math.sin(state.clock.elapsedTime * swaySpeed + swayPhase) * swayAmplitude;
-    currentSway.current = damp(currentSway.current, targetSway, 6.0, dt);
+    currentSway.current = damp(currentSway.current, targetSway, POSITION_DAMPING - 1, dt);
 
     if (hookRef.current) {
       hookRef.current.rotation.z = currentSway.current;

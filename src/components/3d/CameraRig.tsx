@@ -100,7 +100,7 @@ export const CameraRig: React.FC = () => {
 
     if (activeSection === 'store') {
       // ----------------- OVERVIEW RIG -----------------
-      targetPos.current.set(0, 0.35, 0.5);
+      targetPos.current.set(0, 0.25, 0.6);
 
       const lookDist = 4.0;
       const cosP = Math.cos(pitch.current);

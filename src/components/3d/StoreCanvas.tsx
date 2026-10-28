@@ -15,11 +15,11 @@ export const StoreCanvas: React.FC = () => {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none touch-none">
       <Canvas
-        camera={{ position: [0, 0.35, 2.8], fov: 42 }}
+        camera={{ position: [0, 0.25, 0.6], fov: 55 }}
         shadows="soft"
         dpr={[1, 2]}
         gl={{
-          toneMapping: THREE.NoToneMapping,
+          toneMapping: THREE.ACESFilmicToneMapping,
           antialias: true,
           powerPreference: 'high-performance',
         }}

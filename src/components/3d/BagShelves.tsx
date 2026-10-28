@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { useStore } from '../../context/StoreContext';
 import { Product } from '../../types/store';
-import { damp } from '../../utils/math3d';
+import { damp, POSITION_DAMPING, ROTATION_DAMPING } from '../../utils/math3d';
+import { getTextureUrl } from '../../utils/textures';
 
 interface BagDisplayItemProps {
   product: Product;
@@ -34,9 +35,9 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
 
   const textures = useMemo(() => {
     const loader = new THREE.TextureLoader();
-    const front = loader.load(product.views.front.imageUrl);
-    const side = loader.load(product.views.side.imageUrl);
-    const back = loader.load(product.views.back.imageUrl);
+    const front = loader.load(getTextureUrl(product.category, product.id, 'front'));
+    const side = loader.load(getTextureUrl(product.category, product.id, 'side'));
+    const back = loader.load(getTextureUrl(product.category, product.id, 'back'));
 
     [front, side, back].forEach((t) => {
       t.colorSpace = THREE.SRGBColorSpace;
@@ -68,17 +69,17 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
     const dt = Math.min(delta, 0.05);
 
     const targetLift = isHovered || isDragging ? 0.04 : 0;
-    currentLift.current = damp(currentLift.current, targetLift, 8.0, dt);
+    currentLift.current = damp(currentLift.current, targetLift, POSITION_DAMPING, dt);
     cardRef.current.position.y = (isCrossbody ? -bagH * 0.45 : bagH * 0.45) + currentLift.current;
 
     if (shadowRef.current && !isCrossbody) {
       const shadowMat = shadowRef.current.material as THREE.MeshBasicMaterial;
-      shadowMat.opacity = damp(shadowMat.opacity, isHovered ? 0.15 : 0.4, 8.0, dt);
+      shadowMat.opacity = damp(shadowMat.opacity, isHovered ? 0.15 : 0.4, POSITION_DAMPING, dt);
     }
 
     if (!isDragging) {
       const targetAngle = isHovered ? 0.3 : 0;
-      currentAngle.current = damp(currentAngle.current, targetAngle, 6.0, dt);
+      currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
     }
 
     let a = currentAngle.current % (Math.PI * 2);

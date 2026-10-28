@@ -42,8 +42,14 @@ export const RoomScene: React.FC = () => {
       {[-2, 0, 2].map((z, idx) => (
         <group key={idx} position={[0, 2.58, z]}>
           <mesh>
-            <boxGeometry args={[5.5, 0.04, 0.12]} />
-            <meshBasicMaterial color="#ffffff" />
+            <boxGeometry args={[5, 0.04, 0.12]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              emissive="#ffffff"
+              emissiveIntensity={1.0}
+              roughness={0.3}
+              metalness={0.7}
+            />
           </mesh>
           <pointLight color="#fff7ed" intensity={3.5} distance={5} />
         </group>

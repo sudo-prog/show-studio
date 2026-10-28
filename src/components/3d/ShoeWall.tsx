@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { useStore } from '../../context/StoreContext';
 import { Product } from '../../types/store';
-import { damp, getShoeViewKey } from '../../utils/math3d';
+import { damp, getShoeViewKey, POSITION_DAMPING, ROTATION_DAMPING } from '../../utils/math3d';
+import { getTextureUrl } from '../../utils/textures';
 
 interface ShoeDisplayItemProps {
   product: Product;
@@ -33,10 +34,10 @@ const ShoeDisplayItem: React.FC<ShoeDisplayItemProps> = ({
   // Load 4 textures (outer, inner, toe, heel)
   const textures = useMemo(() => {
     const loader = new THREE.TextureLoader();
-    const outer = loader.load(product.views.outer?.imageUrl || product.views.side.imageUrl);
-    const inner = loader.load(product.views.inner?.imageUrl || product.views.side.imageUrl);
-    const toe = loader.load(product.views.toe?.imageUrl || product.views.front.imageUrl);
-    const heel = loader.load(product.views.heel?.imageUrl || product.views.back.imageUrl);
+    const outer = loader.load(getTextureUrl(product.category, product.id, 'outer'));
+    const inner = loader.load(getTextureUrl(product.category, product.id, 'inner'));
+    const toe = loader.load(getTextureUrl(product.category, product.id, 'toe'));
+    const heel = loader.load(getTextureUrl(product.category, product.id, 'heel'));
 
     [outer, inner, toe, heel].forEach((t) => {
       t.colorSpace = THREE.SRGBColorSpace;
@@ -68,21 +69,21 @@ const ShoeDisplayItem: React.FC<ShoeDisplayItemProps> = ({
 
     // Lift when hovered or dragging
     const targetLift = isHovered || isDragging ? 0.05 : 0;
-    currentLift.current = damp(currentLift.current, targetLift, 8.0, dt);
+    currentLift.current = damp(currentLift.current, targetLift, POSITION_DAMPING, dt);
     cardRef.current.position.y = 0.08 + currentLift.current;
 
     // Contact shadow fades and expands when lifted
     if (shadowRef.current) {
       const shadowMat = shadowRef.current.material as THREE.MeshBasicMaterial;
-      shadowMat.opacity = damp(shadowMat.opacity, isHovered ? 0.18 : 0.45, 8.0, dt);
-      const sScale = damp(shadowRef.current.scale.x, isHovered ? 1.15 : 1.0, 8.0, dt);
+      shadowMat.opacity = damp(shadowMat.opacity, isHovered ? 0.18 : 0.45, POSITION_DAMPING, dt);
+      const sScale = damp(shadowRef.current.scale.x, isHovered ? 1.15 : 1.0, POSITION_DAMPING, dt);
       shadowRef.current.scale.set(sScale, sScale, 1);
     }
 
     // Gentle hover rotation if not actively dragging
     if (!isDragging) {
       const targetAngle = isHovered ? 0.35 : 0;
-      currentAngle.current = damp(currentAngle.current, targetAngle, 6.0, dt);
+      currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
     }
 
     // Determine active 4-quadrant photo texture

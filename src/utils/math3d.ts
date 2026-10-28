@@ -3,6 +3,35 @@
  * Derived from the specifications in the build guide.
  */
 
+// ---------------------------------------------------------------
+// Animation constants
+// ---------------------------------------------------------------
+
+/** Damping lambda for overview (store-layout camera) position/look. */
+export const OVERVIEW_DAMPING = 0.6;
+
+/** Damping lambda for section (department camera) position/look. */
+export const SECTION_DAMPING = 0.3;
+
+/** Position damping lambda for individual product interactions. */
+export const POSITION_DAMPING = 7;
+
+/** Rotation damping lambda for individual product interactions. */
+export const ROTATION_DAMPING = 8;
+
+/** Hover turn amplitude in radians. */
+export const HOVER_TURN_ANGLE = 0.5;
+
+/** Hover lift amplitude in meters. */
+export const HOVER_LIFT = 0.03;
+
+/** Spring configuration: 300ms duration, 0.55 tension, 0.6 bounce. */
+export const SPRING_CONFIG = {
+  duration: 300,   // ms
+  tension: 0.55,
+  bounce: 0.6,
+};
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
