@@ -1,11 +1,10 @@
 # SHOW STUDIO
-## Nike Virtual Store — Rebuilt via morluto/rea
+## Nike Virtual Store — Rebuilt via morluto
 
 A React + Three.js (React Three Fiber) 3D virtual Nike store.
 
 ### Original
-- Live: https://virtualstore.bildyard.com
-- Creator: Bildyard (bildyard.com)
+
 - Stack: React 19.3.0, @react-three/fiber 9.8.1, Three.js r186
 
 ### This Project
