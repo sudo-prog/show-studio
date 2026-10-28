@@ -4,34 +4,126 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#e9e6e0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Nike Virtual Store</title>
-    <meta name="description" content="Walk through a 3D Nike store: browse the clothing rack, sneaker wall, caps and bags, turn every product around and add it to your cart." />
-    <meta property="og:type" content="website" />
+    <meta
+      name="description"
+      content="Walk through a 3D Nike store: browse the clothing rack, sneaker wall, caps and bags, turn every product around and add it to your cart."
+    />
     <meta property="og:title" content="Nike Virtual Store" />
-    <meta property="og:description" content="Walk through a 3D Nike store and shop the clothing rack, sneaker wall, caps and bags." />
-    <meta property="og:url" content="https://virtualstore.bildyard.com/" />
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta
+      property="og:description"
+      content="Walk through a 3D Nike store and shop the clothing rack, sneaker wall, caps and bags."
+    />
+    <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#e9e6e0" />
+
+    <!-- Google Fonts: Inter font for UI as required by brief -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      html,body{background:#e9e6e0;margin:0}
-      #splash{z-index:10;color:#111;background:#e9e6e0;place-items:center;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;transition:opacity .6s,visibility .6s;display:grid;position:fixed;inset:0}
-      #splash.done{opacity:0;visibility:hidden}
-      .splash-mark{flex-direction:column;align-items:center;display:flex}
-      .splash-logo{letter-spacing:-.02em;align-items:center;gap:8px;font-size:44px;font-style:italic;font-weight:900;line-height:1;display:flex}
-      .splash-logo svg{width:64px;height:64px;margin:-14px 0}
-      .splash-sub{letter-spacing:.32em;text-transform:uppercase;color:#5f5d58;margin-top:8px;font-size:11px;font-weight:500}
-      .splash-bar{background:#1111111a;border-radius:2px;width:120px;height:2px;margin-top:28px;position:relative;overflow:hidden}
-      .splash-bar span{background:#111;border-radius:2px;width:40%;animation:1.1s ease-in-out infinite splash-slide;position:absolute;inset:0}
-      @keyframes splash-slide{0%{transform:translate(-100%)}to{transform:translate(250%)}}
+      html, body {
+        background: #e9e6e0;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: 'Inter', Helvetica Neue, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      #splash {
+        z-index: 9999;
+        color: #111;
+        background: #e9e6e0;
+        display: grid;
+        place-items: center;
+        position: fixed;
+        inset: 0;
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+        pointer-events: none;
+      }
+      #splash.done {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .splash-mark {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .splash-logo {
+        letter-spacing: -0.02em;
+        font-size: 44px;
+        font-style: italic;
+        font-weight: 900;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #111;
+      }
+      .splash-logo svg {
+        width: 64px;
+        height: 64px;
+        margin: -14px 0;
+      }
+      .splash-sub {
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: #5f5d58;
+        margin-top: 8px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+      .splash-bar {
+        background: #1111111a;
+        border-radius: 2px;
+        width: 120px;
+        height: 2px;
+        margin-top: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+      .splash-bar span {
+        background: #111;
+        border-radius: 2px;
+        width: 40%;
+        animation: 1.1s ease-in-out infinite splash-slide;
+        position: absolute;
+        inset: 0;
+      }
+      @keyframes splash-slide {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
+      }
     </style>
   </head>
   <body>
-  <div id="root"></div>
-    <script type="module" crossorigin src="/src/main.jsx"></script>
+    <!-- Instant splash screen matching virtualstore.bildyard.com -->
+    <div id="splash" aria-label="Loading the store">
+      <div class="splash-mark">
+        <div class="splash-logo" id="splash-brand-name">
+          NIKE
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="inline-block">
+            <path
+              fill="currentColor"
+              d="M24 7.8L6.442 15.276c-1.456.616-2.679.925-3.668.925-1.12 0-1.933-.392-2.437-1.177-.317-.504-.41-1.143-.28-1.918.13-.775.476-1.6 1.036-2.478.467-.71 1.232-1.643 2.297-2.8a6.122 6.122 0 0 0-.784 1.848c-.28 1.195-.028 2.072.756 2.632.373.261.886.392 1.54.392.522 0 1.11-.084 1.764-.252L24 7.8z"
+            />
+          </svg>
+        </div>
+        <div class="splash-sub">Virtual Store</div>
+        <div class="splash-bar"><span></span></div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
