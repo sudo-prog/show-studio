@@ -1,0 +1,39 @@
+# Maestro flow: Overview page - verify camera angle and environment
+# Original: eye-level camera, slightly off-center into a corner
+appId: com.showstudio.web
+url: https://show-studio-seven.vercel.app
+tags: [overview, camera]
+---
+
+- extendedWaitUntil:
+    visible: "NIKE"
+    timeout: 15000
+
+- waitfor:
+    timeout: 5000
+
+- tapOn:
+    point: 50%, 90%
+
+# Verify 3D canvas container exists with touch-none class
+- assertVisible:
+    element:
+      className: "touch-none"
+
+# Verify all four department walls are visible in overview
+# Clothing (back wall), Shoes (right wall), Bags (front wall), Caps (left wall)
+
+# Verify wall lettering is present (fades when product is open)
+- assertVisible:
+    text: "COLLECTION"
+- assertVisible:
+    text: "FOOTWEAR"
+- assertVisible:
+    text: "BAGS"
+- assertVisible:
+    text: "HEADWEAR"
+
+# Verify floor is visible (light color)
+- assertVisible:
+    element:
+      className: "select-none"

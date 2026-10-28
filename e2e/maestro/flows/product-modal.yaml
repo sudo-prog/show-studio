@@ -1,0 +1,57 @@
+# Maestro flow: Product card touch interaction - drag to turn 360°
+# Tests momentum + spring snap-back on garment, shoe, cap, and bag cards
+appId: com.showstudio.web
+url: https://show-studio-seven.vercel.app
+tags: [product, touch, momentum]
+---
+
+- extendedWaitUntil:
+    visible: "NIKE"
+    timeout: 15000
+
+- waitfor:
+    timeout: 5000
+
+# Dismiss splash
+- tapOn:
+    point: 50%, 90%
+
+# Go to Clothing section where garments are
+- tapOn:
+    text: "Clothing"
+
+# Tap on a garment to open product modal
+- tapOn:
+    point: 50%, 50%
+
+# Verify product modal is open
+- extendedWaitUntil:
+    text: "Add to Cart"
+    timeout: 8000
+
+# Verify the 360° turn stage is visible
+- assertVisible:
+    text: "Drag to turn 360°"
+
+# Verify thumbnail view selector (front/side/back)
+- assertVisible:
+    text: "Front"
+- assertVisible:
+    text: "Side"
+- assertVisible:
+    text: "Back"
+
+# Verify price and size selector
+- assertVisible:
+    text: "Select Size"
+
+# Verify colorway badge
+- assertVisible:
+    text: "In Stock"
+
+# Close product modal
+- tapOn:
+    element:
+      point: 90%, 10%
+- assertNotVisible:
+    text: "Add to Cart"

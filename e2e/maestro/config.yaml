@@ -1,0 +1,10 @@
+flows: maestro/flows
+tags:
+  - smoke
+  - visual
+onFlowStart:
+  - script:
+      file: scripts/log-start.js
+onFlowComplete:
+  - script:
+      file: scripts/log-end.js

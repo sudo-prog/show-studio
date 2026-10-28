@@ -1,0 +1,31 @@
+# Maestro flow: Shoes department (right wall)
+# Original: 3x3 floating shelf grid with soft contact shadows
+appId: com.showstudio.web
+url: https://show-studio-seven.vercel.app
+tags: [shoes, department]
+---
+
+- extendedWaitUntil:
+    visible: "NIKE"
+    timeout: 15000
+
+- waitfor:
+    timeout: 5000
+
+# Dismiss splash
+- tapOn:
+    point: 50%, 90%
+
+# Navigate to Shoes department
+- tapOn:
+    text: "Shoes"
+
+# Verify we're in shoes section
+- assertVisible:
+    text: "Shoes"
+
+# Verify return to overview
+- tapOn:
+    text: "Store"
+- assertVisible:
+    text: "Store"

@@ -44,7 +44,7 @@ export const HowToExploreModal: React.FC = () => {
                 <strong>Clothing Rack:</strong> Hover your cursor over garments; they smoothly turn to face you while neighbours glide aside.
               </li>
               <li>
-                <strong>Glide to Wall:</strong> Click department buttons in the bottom pill bar (Clothing, Shoes, Bags, Caps).
+                <strong>Glide to Wall:</strong> Click department buttons in the bottom pill bar (Clothing, Caps, Bags, Shoes).
               </li>
               <li>
                 <strong>Inspect Product:</strong> Click any product to open it, drag horizontally to spin 360°, and choose your size.

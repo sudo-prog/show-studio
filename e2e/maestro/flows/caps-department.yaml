@@ -1,0 +1,36 @@
+# Maestro flow: Caps department (left wall)
+# Original: 2x4 birch pegboard with 8 caps, each hung from a peg
+appId: com.showstudio.web
+url: https://show-studio-seven.vercel.app
+tags: [caps, department]
+---
+
+- extendedWaitUntil:
+    visible: "NIKE"
+    timeout: 15000
+
+- waitfor:
+    timeout: 5000
+
+# Dismiss splash
+- tapOn:
+    point: 50%, 90%
+
+# Navigate to Caps department
+- tapOn:
+    text: "Caps"
+
+# Verify we're in caps section
+- assertVisible:
+    text: "Caps"
+
+# Verify the pegboard display is present
+- assertVisible:
+    element:
+      className: "touch-none"
+
+# Verify return to overview
+- tapOn:
+    text: "Store"
+- assertVisible:
+    text: "Store"

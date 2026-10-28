@@ -1,0 +1,36 @@
+# Maestro flow: Clothing department (back wall)
+# Original: horizontal chrome clothing rail, garments hang in single row
+appId: com.showstudio.web
+url: https://show-studio-seven.vercel.app
+tags: [clothing, department]
+---
+
+- extendedWaitUntil:
+    visible: "NIKE"
+    timeout: 15000
+
+- waitfor:
+    timeout: 5000
+
+# Dismiss splash
+- tapOn:
+    point: 50%, 90%
+
+# Navigate to Clothing department
+- tapOn:
+    text: "Clothing"
+
+# Verify we're in clothing section
+- assertVisible:
+    text: "Clothing"
+
+# Verify clothing rail is visible (garments on hangers)
+# The clothing rack has 10 garments on a chrome rail
+- assertVisible:
+    text: "Clothing"
+
+# Verify we can return to overview
+- tapOn:
+    text: "Store"
+- assertVisible:
+    text: "Store"

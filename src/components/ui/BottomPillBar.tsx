@@ -6,12 +6,13 @@ import { SectionId } from '../../types/store';
 export const BottomPillBar: React.FC = () => {
   const { activeSection, setActiveSection, setIsInfoModalOpen } = useStore();
 
+  // Order matches original Nike Virtual Store: Store / Clothing / Caps / Bags / Shoes
   const navItems: { id: SectionId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'store', label: 'Store', icon: Compass },
     { id: 'clothing', label: 'Clothing', icon: Shirt },
-    { id: 'shoes', label: 'Shoes', icon: Footprints },
-    { id: 'bags', label: 'Bags', icon: Briefcase },
     { id: 'caps', label: 'Caps', icon: GraduationCap },
+    { id: 'bags', label: 'Bags', icon: Briefcase },
+    { id: 'shoes', label: 'Shoes', icon: Footprints },
   ];
 
   return (

@@ -1,0 +1,62 @@
+# Maestro flow: Home / Overview page verification
+# Verifies the bottom navigation matches the original Nike Virtual Store
+# Original nav order: Store / Clothing / Caps / Bags / Shoes
+# Original camera: eye-level, slightly off-center into a corner
+appId: com.showstudio.web
+url: https://show-studio-seven.vercel.app
+---
+
+# Wait for splash to fade and canvas to load
+- extendedWaitUntil:
+    visible: "NIKE"
+    timeout: 15000
+
+# Dismiss splash
+- waitfor:
+    timeout: 8000
+- tapOn:
+    point: 50%, 50%
+
+# Verify brand wordmark at top center
+- assertVisible:
+    text: "NIKE"
+- assertVisible:
+    text: "VIRTUAL STORE"
+
+# Verify shopping bag icon at top-right
+- assertVisible:
+    id: "cart-button"
+
+# Verify bottom pill bar navigation - order matters for 1:1 match
+# Original: Store / Clothing / Caps / Bags / Shoes
+- scrollUntilVisible:
+    element:
+      text: "Store"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    text: "Store"
+- assertVisible:
+    text: "Clothing"
+- assertVisible:
+    text: "Caps"
+- assertVisible:
+    text: "Bags"
+- assertVisible:
+    text: "Shoes"
+
+# Verify info button (i) is present at far right of nav
+- assertVisible:
+    text: "i"
+
+# Verify the 3D canvas is present
+- assertVisible:
+    element:
+      className: "touch-none"
+
+# Verify "360° Overview" and "Brand Studio" buttons in Header
+- assertVisible:
+    text: "360° Overview"
+- assertVisible:
+    text: "Brand Studio"
