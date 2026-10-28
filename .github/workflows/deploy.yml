@@ -18,13 +18,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build show-studio
-        run: npm run build
+        run: pnpm build
         env:
           NODE_ENV: "production"
 
