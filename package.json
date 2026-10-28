@@ -1,0 +1,27 @@
+{
+  "name": "show-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Show Studio - Rebuilding Nike Virtual Store as a modular 3D e-commerce experience",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.106.0",
+    "@react-three/fiber": "^9.8.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.186.0",
+    "zustand": "^5.0.0-beta.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.7",
+    "vite": "^6.0.0",
+    "ws": "^8.22.0"
+  }
+}
