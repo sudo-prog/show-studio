@@ -70,9 +70,10 @@ export default function ShopSection({
 
   return (
     <group ref={groupRef} position={origin} rotation-y={rotationY}>
-      {/* Section label */}
+      {/* Section label - counter-rotate so it faces the camera */}
       <Text
         position={[0, section.fitHeight ? section.fitHeight / 2 + 0.5 : 2.5, 0]}
+        rotation-y={-rotationY}
         fontSize={0.3}
         color="#111"
         anchorX="center"
