@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Splash from './components/Splash'
 import Header from './components/Header'
@@ -66,6 +66,7 @@ function App() {
       
       <Canvas
         camera={{ position: [0, 1.6, 6], fov: 60 }}
+        dpr={[1, 2]}
         style={{ width: '100%', height: '100%' }}
         onPointerMissed={() => {
           setSelectedProduct(null)

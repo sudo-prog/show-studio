@@ -31,11 +31,12 @@ const SECTION_VIEWS = {
 export default function ShopSection({ 
   category, 
   section, 
-  products: productList, 
+  productList, 
   selectedProduct, 
   hoveredProduct, 
   onSelect,
   onHover,
+  onHoverEnd,
 }) {
   const groupRef = useRef()
   

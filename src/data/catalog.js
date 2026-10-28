@@ -31,8 +31,6 @@ export const products = {
     { id: 'utility-duffel-brown', name: 'Nike Utility Power 2.0 Duffel (51L)', price: 80 },
     { id: 'slim-waistpack-blue', name: 'Nike Slim 4.0 Running Waist Pack', price: 25 },
     { id: 'acg-crossbody-chocolate', name: 'ACG DAYMAX Crossbody Bag (3L)', price: 70 },
-    { id: 'heritage-crossside-rose', name: 'Nike Heritage Crossbody Bag 2.0 (4L)', price: 30 },
-    { id: 'hayward-crossside-jade', name: 'Nike Hayward Patrol Crossbody Bag (4L)', price: 36.97 },
     { id: 'jordan-mini-messenger-black', name: 'Jordan Collectors Mini Messenger Bag (3.6L)', price: 41.97 },
   ],
   caps: [
