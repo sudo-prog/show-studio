@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { useStore } from '../../context/StoreContext';
 import { Product } from '../../types/store';
-import { damp, getShoeViewKey, POSITION_DAMPING, ROTATION_DAMPING } from '../../utils/math3d';
+import { damp, getShoeViewKey, clamp, POSITION_DAMPING, ROTATION_DAMPING, SPRING_CONFIG } from '../../utils/math3d';
 import { getTextureUrl } from '../../utils/textures';
 
 interface ShoeDisplayItemProps {
@@ -27,6 +27,8 @@ const ShoeDisplayItem: React.FC<ShoeDisplayItemProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragStartAngle = useRef(0);
+  const angularVelocity = useRef(0);
+  const prevClientX = useRef(0);
 
   const currentAngle = useRef<number>(0); // 0 rad = outer side, toe right
   const currentLift = useRef<number>(0);
@@ -82,8 +84,26 @@ const ShoeDisplayItem: React.FC<ShoeDisplayItemProps> = ({
 
     // Gentle hover rotation if not actively dragging
     if (!isDragging) {
-      const targetAngle = isHovered ? 0.35 : 0;
-      currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
+      // Apply momentum with decay after release
+      angularVelocity.current *= Math.exp(-6.0 * dt);
+      currentAngle.current += angularVelocity.current * dt;
+
+      // If no significant momentum, spring snap to nearest quadrant (outer=0, toe=PI/2, inner=PI, heel=3*PI/2)
+      if (Math.abs(angularVelocity.current) < 0.001) {
+        const quarter = Math.PI / 2;
+        // Normalize to [0, 2PI)
+        let a = currentAngle.current % (Math.PI * 2);
+        if (a < 0) a += Math.PI * 2;
+        // Find nearest quadrant center
+        const nearestQuad = Math.round(a / quarter) * quarter;
+        // Spring snap-back to nearest quadrant using SPRING_CONFIG
+        const springTarget = SPRING_CONFIG.tension * 0.8;
+        currentAngle.current = damp(currentAngle.current, nearestQuad, springTarget, dt);
+      } else {
+        // While momentum is still active, apply gentle hover pull
+        const targetAngle = isHovered ? 0.35 : 0;
+        currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
+      }
     }
 
     // Determine active 4-quadrant photo texture
@@ -109,6 +129,8 @@ const ShoeDisplayItem: React.FC<ShoeDisplayItemProps> = ({
     setIsDragging(true);
     dragStartX.current = e.clientX;
     dragStartAngle.current = currentAngle.current;
+    prevClientX.current = e.clientX;
+    angularVelocity.current = 0;
   };
 
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
@@ -116,11 +138,16 @@ const ShoeDisplayItem: React.FC<ShoeDisplayItemProps> = ({
     e.stopPropagation();
     const deltaX = e.clientX - dragStartX.current;
     currentAngle.current = dragStartAngle.current + deltaX * 0.015;
+    // Track velocity for momentum
+    const deltaDelta = e.clientX - prevClientX.current;
+    angularVelocity.current = -deltaDelta * 0.015 * 0.06;
+    prevClientX.current = e.clientX;
   };
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     setIsDragging(false);
+    // Momentum continues via angularVelocity in useFrame
   };
 
   if (isOpened) return null;

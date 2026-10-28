@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, X, Check, AlertCircle } from './icons';
 import { useStore } from '../../context/StoreContext';
 import { useCart } from '../../context/CartContext';
 import { formatPrice, validateProductSelection } from '../../utils/cartLogic';
+import { damp, SPRING_CONFIG } from '../../utils/math3d';
 
 export const ProductModal: React.FC = () => {
   const { selectedProduct, closeProduct, stepProduct, brandSettings } = useStore();
@@ -15,6 +16,9 @@ export const ProductModal: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragStartAngle = useRef(0);
+  const angularVelocity = useRef(0);
+  const prevClientX = useRef(0);
+  const rafRef = useRef<number | null>(null);
   const [justAdded, setJustAdded] = useState(false);
 
   // Reset size selection when product changes
@@ -24,8 +28,74 @@ export const ProductModal: React.FC = () => {
       setSizeError(null);
       setCurrentAngle(0);
       setJustAdded(false);
+      angularVelocity.current = 0;
+      stopMomentum();
     }
   }, [selectedProduct?.id]);
+
+  // Stop momentum animation loop
+  const stopMomentum = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
+  // Start momentum + spring snap-back loop
+  const startMomentumLoop = useCallback(() => {
+    if (rafRef.current) return; // already running
+
+    const decayFactor = Math.exp(-SPRING_CONFIG.duration * 0.001 * 60); // decay per frame
+    const quarter = Math.PI / 2;
+
+    const tick = () => {
+      angularVelocity.current *= decayFactor;
+
+      setCurrentAngle((prev) => {
+        let nextAngle = prev + angularVelocity.current;
+
+        // Spring snap to nearest quadrant when momentum is low
+        if (Math.abs(angularVelocity.current) < 0.0005) {
+          // Normalize to [0, 2PI)
+          let a = nextAngle % (Math.PI * 2);
+          if (a < 0) a += Math.PI * 2;
+          const nearestQuad = Math.round(a / quarter) * quarter;
+          // Spring snap using SPRING_CONFIG.tension as damping factor
+          nextAngle = nextAngle + (nearestQuad - nextAngle) * (SPRING_CONFIG.tension * 0.15);
+        }
+
+        // Stop when angle is very close to nearest quadrant and momentum is negligible
+        if (Math.abs(angularVelocity.current) < 0.0001) {
+          let a = nextAngle % (Math.PI * 2);
+          if (a < 0) a += Math.PI * 2;
+          const nearestQuad = Math.round(a / quarter) * quarter;
+          if (Math.abs(nextAngle - nearestQuad) < 0.01) {
+            nextAngle = nearestQuad;
+            angularVelocity.current = 0;
+            rafRef.current = null;
+            return nextAngle;
+          }
+        }
+
+        return nextAngle;
+      });
+
+      if (angularVelocity.current !== 0 || Math.abs(angularVelocity.current) > 0.0001) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+  }, [stopMomentum]);
+
+  // Cleanup rAF on unmount
+  useEffect(() => {
+    return () => {
+      stopMomentum();
+    };
+  }, [stopMomentum]);
 
   const views = selectedProduct?.views;
   const isShoe = selectedProduct?.category === 'shoes';
@@ -77,6 +147,9 @@ export const ProductModal: React.FC = () => {
     setIsDragging(true);
     dragStartX.current = e.clientX;
     dragStartAngle.current = currentAngle;
+    prevClientX.current = e.clientX;
+    angularVelocity.current = 0;
+    stopMomentum();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
@@ -84,6 +157,10 @@ export const ProductModal: React.FC = () => {
     if (!isDragging) return;
     const dx = e.clientX - dragStartX.current;
     setCurrentAngle(dragStartAngle.current + dx * 0.012);
+    // Track velocity for momentum
+    const deltaDelta = e.clientX - prevClientX.current;
+    angularVelocity.current = -deltaDelta * 0.012 * 0.08;
+    prevClientX.current = e.clientX;
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -91,6 +168,8 @@ export const ProductModal: React.FC = () => {
     try {
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
+    // Start momentum + spring snap-back
+    startMomentumLoop();
   };
 
   // Add to cart handler with validation & shake
@@ -147,7 +226,11 @@ export const ProductModal: React.FC = () => {
               return (
                 <button
                   key={v.id}
-                  onClick={() => setCurrentAngle(v.angle)}
+                  onClick={() => {
+                    setCurrentAngle(v.angle);
+                    angularVelocity.current = 0;
+                    stopMomentum();
+                  }}
                   className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl p-1 bg-white/70 hover:bg-white border transition-all cursor-pointer flex items-center justify-center overflow-hidden shadow-sm ${
                     isCurrent ? 'border-stone-900 ring-2 ring-stone-900/20 scale-105' : 'border-stone-200/80'
                   }`}
@@ -160,12 +243,11 @@ export const ProductModal: React.FC = () => {
                   />
                 </button>
               );
-            })}
-          </div>
+            })}</div>
 
           {/* Interactive Turn Stage */}
           <div
-            className="relative w-full max-w-md h-full flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
+            className="relative w-full max-w-md h-full flex items-center justify-center touch-none"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}

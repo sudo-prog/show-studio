@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { useStore } from '../../context/StoreContext';
 import { Product } from '../../types/store';
-import { damp, POSITION_DAMPING, ROTATION_DAMPING } from '../../utils/math3d';
+import { damp, clamp, POSITION_DAMPING, ROTATION_DAMPING, SPRING_CONFIG } from '../../utils/math3d';
 import { getTextureUrl } from '../../utils/textures';
 
 interface BagDisplayItemProps {
@@ -29,6 +29,8 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragStartAngle = useRef(0);
+  const angularVelocity = useRef(0);
+  const prevClientX = useRef(0);
 
   const currentAngle = useRef<number>(0);
   const currentLift = useRef<number>(0);
@@ -78,8 +80,22 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
     }
 
     if (!isDragging) {
-      const targetAngle = isHovered ? 0.3 : 0;
-      currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
+      // Apply momentum with decay after release
+      angularVelocity.current *= Math.exp(-6.0 * dt);
+      currentAngle.current += angularVelocity.current * dt;
+
+      // If no significant momentum, spring snap to nearest quadrant
+      if (Math.abs(angularVelocity.current) < 0.001) {
+        const quarter = Math.PI / 2;
+        let a = currentAngle.current % (Math.PI * 2);
+        if (a < 0) a += Math.PI * 2;
+        const nearestQuad = Math.round(a / quarter) * quarter;
+        const springTarget = SPRING_CONFIG.tension * 0.8;
+        currentAngle.current = damp(currentAngle.current, nearestQuad, springTarget, dt);
+      } else {
+        const targetAngle = isHovered ? 0.3 : 0;
+        currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
+      }
     }
 
     let a = currentAngle.current % (Math.PI * 2);
@@ -119,6 +135,8 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
     setIsDragging(true);
     dragStartX.current = e.clientX;
     dragStartAngle.current = currentAngle.current;
+    prevClientX.current = e.clientX;
+    angularVelocity.current = 0;
   };
 
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
@@ -126,11 +144,16 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
     e.stopPropagation();
     const deltaX = e.clientX - dragStartX.current;
     currentAngle.current = dragStartAngle.current + deltaX * 0.015;
+    // Track velocity for momentum
+    const deltaDelta = e.clientX - prevClientX.current;
+    angularVelocity.current = -deltaDelta * 0.015 * 0.06;
+    prevClientX.current = e.clientX;
   };
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     setIsDragging(false);
+    // Momentum continues via angularVelocity in useFrame
   };
 
   if (isOpened) return null;

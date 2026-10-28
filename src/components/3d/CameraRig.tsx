@@ -3,7 +3,16 @@ import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useStore } from '../../context/StoreContext';
 import { SECTIONS } from '../../data/sections';
-import { damp, clamp } from '../../utils/math3d';
+import {
+  damp,
+  clamp,
+  OVERVIEW_DAMPING,
+  SECTION_DAMPING,
+  SPRING_CONFIG,
+} from '../../utils/math3d';
+
+// Velocity decay factor for momentum (per second)
+const MOMENTUM_DECAY = 5.5;
 
 export const CameraRig: React.FC = () => {
   const { activeSection, setActiveSection, selectedProduct } = useStore();
@@ -13,8 +22,13 @@ export const CameraRig: React.FC = () => {
   const yaw = useRef<number>(0);
   const pitch = useRef<number>(0);
 
+  // Momentum: angular velocity from drag release
+  const yawVelocity = useRef<number>(0);
+  const pitchVelocity = useRef<number>(0);
+
   // Section panning offset along rail/wall tangent
   const panX = useRef<number>(0);
+  const panVelocity = useRef<number>(0);
   const zoomLevel = useRef<number>(1.0);
 
   // Drag interaction tracking
@@ -23,6 +37,9 @@ export const CameraRig: React.FC = () => {
   const startYaw = useRef<number>(0);
   const startPitch = useRef<number>(0);
   const startPanX = useRef<number>(0);
+
+  // Momentum tracking during drag
+  const prevMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Camera animation target states
   const targetPos = useRef<THREE.Vector3>(new THREE.Vector3(0, 0.25, 0.6));
@@ -40,6 +57,12 @@ export const CameraRig: React.FC = () => {
       startYaw.current = yaw.current;
       startPitch.current = pitch.current;
       startPanX.current = panX.current;
+      // Kill any existing momentum
+      yawVelocity.current = 0;
+      pitchVelocity.current = 0;
+      panVelocity.current = 0;
+      // Track mouse for velocity calculation
+      prevMousePos.current = { x: e.clientX, y: e.clientY };
     };
 
     const onPointerMove = (e: PointerEvent) => {
@@ -47,18 +70,31 @@ export const CameraRig: React.FC = () => {
       const dx = e.clientX - pointerStart.current.x;
       const dy = e.clientY - pointerStart.current.y;
 
+      // Track velocity for momentum (pixels per frame, normalized)
+      const deltaX = e.clientX - prevMousePos.current.x;
+      const deltaY = e.clientY - prevMousePos.current.y;
+      prevMousePos.current = { x: e.clientX, y: e.clientY };
+
       if (activeSection === 'store') {
         // Overview: drag rotates yaw & pitch
         yaw.current = startYaw.current - dx * 0.005;
         pitch.current = clamp(startPitch.current + dy * 0.003, -0.45, 0.45);
+
+        // Accumulate velocity for momentum (scaled: negative because drag direction is opposite to desired velocity)
+        yawVelocity.current = -deltaX * 0.004;
+        pitchVelocity.current = deltaY * 0.0025;
       } else {
         // Section: drag slides along tangent
         panX.current = clamp(startPanX.current - dx * 0.0035, -1.2, 1.2);
+
+        // Accumulate velocity for momentum
+        panVelocity.current = -deltaX * 0.003;
       }
     };
 
     const onPointerUp = () => {
       isPointerDown.current = false;
+      // Velocity is already tracked from last move; momentum continues via useFrame
     };
 
     const onWheel = (e: WheelEvent) => {
@@ -92,6 +128,9 @@ export const CameraRig: React.FC = () => {
   useEffect(() => {
     panX.current = 0;
     zoomLevel.current = 1.0;
+    yawVelocity.current = 0;
+    pitchVelocity.current = 0;
+    panVelocity.current = 0;
   }, [activeSection]);
 
   useFrame((_, delta) => {
@@ -102,6 +141,23 @@ export const CameraRig: React.FC = () => {
       // ----------------- OVERVIEW RIG -----------------
       targetPos.current.set(0, 0.25, 0.6);
 
+      // Apply momentum: continue rotating after drag release
+      if (!isPointerDown.current) {
+        yaw.current += yawVelocity.current * dt;
+        pitch.current += pitchVelocity.current * dt;
+
+        // Clamp pitch
+        pitch.current = clamp(pitch.current, -0.45, 0.45);
+
+        // Decay momentum
+        yawVelocity.current *= Math.exp(-MOMENTUM_DECAY * dt);
+        pitchVelocity.current *= Math.exp(-MOMENTUM_DECAY * dt);
+
+        // Stop when velocity is negligible
+        if (Math.abs(yawVelocity.current) < 0.0005) yawVelocity.current = 0;
+        if (Math.abs(pitchVelocity.current) < 0.0005) pitchVelocity.current = 0;
+      }
+
       const lookDist = 4.0;
       const cosP = Math.cos(pitch.current);
       const lookX = -Math.sin(yaw.current) * cosP * lookDist;
@@ -111,9 +167,9 @@ export const CameraRig: React.FC = () => {
       targetLook.current.set(lookX, lookY, lookZ);
 
       // Damp camera position and look target
-      camera.position.x = damp(camera.position.x, targetPos.current.x, 3.8, dt);
-      camera.position.y = damp(camera.position.y, targetPos.current.y, 3.8, dt);
-      camera.position.z = damp(camera.position.z, targetPos.current.z, 3.8, dt);
+      camera.position.x = damp(camera.position.x, targetPos.current.x, OVERVIEW_DAMPING * 6, dt);
+      camera.position.y = damp(camera.position.y, targetPos.current.y, OVERVIEW_DAMPING * 6, dt);
+      camera.position.z = damp(camera.position.z, targetPos.current.z, OVERVIEW_DAMPING * 6, dt);
 
       currentLook.current.x = damp(currentLook.current.x, targetLook.current.x, 5.0, dt);
       currentLook.current.y = damp(currentLook.current.y, targetLook.current.y, 5.0, dt);
@@ -128,6 +184,28 @@ export const CameraRig: React.FC = () => {
       // Wall normal and tangent vectors
       const normal = new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY));
       const tangent = new THREE.Vector3(-Math.cos(rotY), 0, Math.sin(rotY));
+
+      // Apply momentum to section pan
+      if (!isPointerDown.current) {
+        panX.current += panVelocity.current * dt;
+
+        // Decelerate momentum
+        panVelocity.current *= Math.exp(-MOMENTUM_DECAY * dt);
+
+        // Snap-back: spring back to center (0) when momentum dies
+        // Use SPRING_CONFIG for spring snap-back behavior
+        const snapBackForce = -panX.current * SPRING_CONFIG.tension * 2;
+        panVelocity.current += snapBackForce * dt;
+
+        // Stop when negligible
+        if (Math.abs(panVelocity.current) < 0.0001) {
+          panVelocity.current = 0;
+          panX.current = damp(panX.current, 0, 4.0, dt);
+        }
+
+        // Clamp within bounds
+        panX.current = clamp(panX.current, -1.2, 1.2);
+      }
 
       // Distance to fit display width on screen
       const fovRad = THREE.MathUtils.degToRad(38);
@@ -152,14 +230,14 @@ export const CameraRig: React.FC = () => {
 
       targetPos.current.copy(camPos);
 
-      // Smooth damping
-      camera.position.x = damp(camera.position.x, targetPos.current.x, 3.8, dt);
-      camera.position.y = damp(camera.position.y, targetPos.current.y, 3.8, dt);
-      camera.position.z = damp(camera.position.z, targetPos.current.z, 3.8, dt);
+      // Smooth damping using SECTION_DAMPING
+      camera.position.x = damp(camera.position.x, targetPos.current.x, SECTION_DAMPING * 8, dt);
+      camera.position.y = damp(camera.position.y, targetPos.current.y, SECTION_DAMPING * 8, dt);
+      camera.position.z = damp(camera.position.z, targetPos.current.z, SECTION_DAMPING * 8, dt);
 
-      currentLook.current.x = damp(currentLook.current.x, targetLook.current.x, 5.0, dt);
-      currentLook.current.y = damp(currentLook.current.y, targetLook.current.y, 5.0, dt);
-      currentLook.current.z = damp(currentLook.current.z, targetLook.current.z, 5.0, dt);
+      currentLook.current.x = damp(currentLook.current.x, targetLook.current.x, SECTION_DAMPING * 8, dt);
+      currentLook.current.y = damp(currentLook.current.y, targetLook.current.y, SECTION_DAMPING * 8, dt);
+      currentLook.current.z = damp(currentLook.current.z, targetLook.current.z, SECTION_DAMPING * 8, dt);
 
       camera.lookAt(currentLook.current);
     }

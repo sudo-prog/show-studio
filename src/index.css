@@ -1,16 +1,26 @@
 @import "tailwindcss";
 
+@layer utilities {
+  /* Ensure smooth 3D Canvas touch manipulation */
+  canvas {
+    touch-action: none;
+  }
+  /* All 3D card meshes and interactive containers: disable browser touch gestures */
+  .touch-none {
+    touch-action: none;
+  }
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-6px); }
   40%, 80% { transform: translateX(6px); }
 }
-
 .animate-shake {
   animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-/* Ensure smooth 3D Canvas touch manipulation */
-canvas {
+/* Product modal turn stage: grab cursor styling for touch/mouse */
+.product-turn-stage {
   touch-action: none;
 }

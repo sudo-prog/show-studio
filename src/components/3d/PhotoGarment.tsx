@@ -2,7 +2,7 @@ import React, { useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { Product } from '../../types/store';
-import { damp, getGarmentCardPose, POSITION_DAMPING, ROTATION_DAMPING, HOVER_LIFT } from '../../utils/math3d';
+import { damp, getGarmentCardPose, clamp, POSITION_DAMPING, ROTATION_DAMPING, HOVER_LIFT, SPRING_CONFIG } from '../../utils/math3d';
 import { getTextureUrl } from '../../utils/textures';
 
 interface PhotoGarmentProps {
@@ -32,6 +32,8 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragStartAngle = useRef(0);
+  const angularVelocity = useRef(0);
+  const prevClientX = useRef(0);
 
   // Textures for front, side, and back views
   const textures = useMemo(() => {
@@ -68,9 +70,33 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
     currentLift.current = damp(currentLift.current, targetLift, POSITION_DAMPING, dt);
     cardRef.current.position.y = currentLift.current;
 
-    if (!isDragging) {
-      const targetAngle = isHovered ? 0 : -1.35;
-      currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
+    if (isDragging) {
+      // During drag, angle follows finger; momentum tracked in handlers
+    } else {
+      // After release: apply momentum with decay
+      angularVelocity.current *= Math.exp(-6.0 * dt);
+      currentAngle.current += angularVelocity.current * dt;
+
+      // If no significant momentum, spring snap to nearest quadrant
+      // The 4 quadrants: 0 (front), -PI/2 (right side), -PI (back), -3*PI/2 (left/mirrored)
+      // currentAngle starts at -1.35 ≈ -PI/2 (side view) by default
+      if (Math.abs(angularVelocity.current) < 0.001) {
+        const quarter = Math.PI / 2;
+        // Normalize angle to [-2PI, 0) for this garment's range
+        let angle = currentAngle.current % (Math.PI * 4);
+        if (angle > 0) angle -= Math.PI * 4;
+        // Find nearest quadrant target
+        let nearestQuad = Math.round(angle / quarter) * quarter;
+        // Clamp to valid range [-2*PI, 0]
+        nearestQuad = clamp(nearestQuad, -Math.PI * 2, 0);
+        // Spring snap to nearest quadrant using SPRING_CONFIG
+        const springTarget = SPRING_CONFIG.tension * 0.8;
+        currentAngle.current = damp(currentAngle.current, nearestQuad, springTarget, dt);
+      } else {
+        // While momentum is active, apply gentle hover pull
+        const targetAngle = isHovered ? 0 : -1.35;
+        currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
+      }
     }
 
     const targetX = baseX + slideOffset;
@@ -118,12 +144,17 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
+    const target = e.currentTarget as Element;
+    if (target && typeof target.setPointerCapture === 'function') {
+      try {
+        target.setPointerCapture(e.pointerId);
+      } catch {}
+    }
     setIsDragging(true);
     dragStartX.current = e.clientX;
     dragStartAngle.current = currentAngle.current;
+    prevClientX.current = e.clientX;
+    angularVelocity.current = 0;
     onSelect();
   };
 
@@ -132,14 +163,22 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
     e.stopPropagation();
     const deltaX = e.clientX - dragStartX.current;
     currentAngle.current = dragStartAngle.current + deltaX * 0.015;
+    // Track velocity for momentum (pixels per frame → angular velocity)
+    const deltaDelta = e.clientX - prevClientX.current;
+    angularVelocity.current = -deltaDelta * 0.015 * 0.06;
+    prevClientX.current = e.clientX;
   };
 
   const handlePointerUp = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
+    const target = e.currentTarget as Element;
+    if (target && typeof target.releasePointerCapture === 'function') {
+      try {
+        target.releasePointerCapture(e.pointerId);
+      } catch {}
+    }
     setIsDragging(false);
+    // Momentum continues via angularVelocity in useFrame
   };
 
   if (isOpened) return null;

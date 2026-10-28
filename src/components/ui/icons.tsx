@@ -58,7 +58,7 @@ export const ShoppingBag: React.FC<IconProps> = ({ className, style }) => (
     <path d="M2 2h16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
     <path d="M9 7V4a3 3 0 0 1 6 0v3" />
     <path d="M8 7h8" />
-    <path dM="12 7v10" />
+    <path d="M12 7v10" />
   </svg>
 );
 
@@ -134,7 +134,7 @@ export const Footprints: React.FC<IconProps> = ({ className, style }) => (
     <path d="M2 12a5 5 0 0 1 5-5 2 2 0 0 1 2 2 3 3 0 0 0 3 3 3 3 0 0 0 3-3 2 2 0 0 1 2-2 5 5 0 0 1 5 5c0 2.5-2.5 3-2.5 4.5 0 1 .5 1.5 1.5 1.5h.5a2 2 0 0 1 2 2v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2 2 0 0 1 2-2h.5c1 0 1.5-.5 1.5-1.5C7.5 15 5 14.5 5 12z" />
     <path d="M6.5 16c.5 1 2 1.5 2 2.5h7c0-1 .5-1.5 2-2.5" />
     <path d="M9 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-    <path dM="M15 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+    <path d="M15 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
   </svg>
 );
 
