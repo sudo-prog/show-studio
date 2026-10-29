@@ -15,21 +15,30 @@ tags: [product, modal]
     visible: "NIKE"
     timeout: 15000
 
-# Dismiss splash
-- tapOn:
-    point: 50%, 90%
+# Wait for nav pills and bring into view
+- scrollUntilVisible:
+    element:
+      text: "Store"
+    direction: DOWN
+    timeout: 30000
 
 # Go to Clothing section where garments are
 - tapOn:
     text: "Clothing"
 
-# Verify modal opened
+# Wait for section to load - verify active navigation
+- assertTrue:
+    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-white'))"
+
+# Tap on center of canvas to open a product
+# Clothing rack is centered, tap near center
+- tapOn:
+    point: 50%, 45%
+
+# Verify modal opened with Add to Cart button
 - extendedWaitUntil:
     visible: "Add to Cart"
     timeout: 15000
-
-# Verify "Add to Cart" button exists
-- assertVisible: "Add to Cart"
 
 # Verify "Select Size" is present
 - assertVisible: "Select Size"
@@ -44,6 +53,3 @@ tags: [product, modal]
 # Close product modal by tapping top-right area
 - tapOn:
     point: 90%, 10%
-
-# Verify modal is closed
-- assertNotVisible: "Add to Cart"

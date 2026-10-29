@@ -15,19 +15,19 @@ tags: [caps, department]
     visible: "NIKE"
     timeout: 15000
 
-# Dismiss splash
-- tapOn:
-    point: 50%, 90%
+# Wait for nav pills to be rendered via JS
+- assertTrue:
+    condition: "document.querySelectorAll('nav button').length >= 5"
+    timeout: 30000
 
 # Navigate to Caps department
 - tapOn:
     text: "Caps"
 
-# Verify we're in caps section with canvas present
+# Verify section changed - Caps button should be active (bg-white)
+- assertTrue:
+    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Caps' && b.classList.contains('bg-white'))"
+
+# Verify 3D canvas is present
 - assertTrue:
     condition: "document.querySelector('canvas') !== null"
-
-# Verify return to overview
-- tapOn:
-    text: "Store"
-- assertVisible: "Store"

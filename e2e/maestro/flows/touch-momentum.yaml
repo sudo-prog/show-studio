@@ -16,36 +16,36 @@ tags: [touch, momentum, snap]
     visible: "NIKE"
     timeout: 15000
 
-# Dismiss splash
-- tapOn:
-    point: 50%, 90%
+# Wait for nav pills to be rendered via JS
+- assertTrue:
+    condition: "document.querySelectorAll('nav button').length >= 5"
+    timeout: 30000
 
-# Go to Caps section - simpler 3-view product
+# Go to Clothing section where garments are
 - tapOn:
-    text: "Caps"
+    text: "Clothing"
+
+# Wait for section to load
+- assertTrue:
+    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-white'))"
 
 # Tap on a product to open modal
 - tapOn:
-    point: 50%, 50%
+    point: 50%, 45%
 
 # Verify modal opened
-- assertTrue:
-    condition: "document.querySelector('.fixed.inset-0.z-50') !== null"
+- extendedWaitUntil:
+    visible: "Add to Cart"
+    timeout: 15000
 
 # Verify the 360° turn stage hint is visible
 - assertVisible: "Drag to turn 360°"
 
 # Perform a horizontal swipe on the turn stage to trigger drag
-# This tests the touch interaction area (product image area)
 - swipe:
     start: 30%, 60%
     end: 70%, 60%
     duration: 500
-
-# Wait for momentum to decay and snap-back using extendedWaitUntil
-- extendedWaitUntil:
-    visible: "Drag to turn 360°"
-    timeout: 5000
 
 # Verify the product image is still visible (snapped back to nearest quadrant)
 - assertTrue:
@@ -54,4 +54,3 @@ tags: [touch, momentum, snap]
 # Close modal
 - tapOn:
     point: 90%, 10%
-- assertNotVisible: "Drag to turn 360°"

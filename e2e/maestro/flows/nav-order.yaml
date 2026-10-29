@@ -12,20 +12,15 @@ tags: [smoke, nav]
 - launchApp:
     url: http://show-studio-seven.vercel.app
 
+# Wait for brand wordmark
 - extendedWaitUntil:
     visible: "NIKE"
     timeout: 15000
 
-# Dismiss splash by tapping center
-- tapOn:
-    point: 50%, 90%
-
-# Scroll bottom bar into view
-- scrollUntilVisible:
-    element:
-      text: "Store"
-    direction: DOWN
-    timeout: 10000
+# Wait for nav pills to be rendered via JS check
+- assertTrue:
+    condition: "document.querySelectorAll('nav button').length >= 5"
+    timeout: 30000
 
 # Verify exact nav order: Store, Clothing, Caps, Bags, Shoes
 - assertVisible: "Store"
@@ -34,6 +29,6 @@ tags: [smoke, nav]
 - assertVisible: "Bags"
 - assertVisible: "Shoes"
 
-# Verify info button exists (icon-only, use JS)
+# Verify info button exists (icon-only)
 - assertTrue:
     condition: "document.querySelector('[aria-label=\"How to explore virtual store\"]') !== null"

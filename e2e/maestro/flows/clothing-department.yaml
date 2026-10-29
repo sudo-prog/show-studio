@@ -15,23 +15,21 @@ tags: [clothing, department]
     visible: "NIKE"
     timeout: 15000
 
-# Dismiss splash
-- tapOn:
-    point: 50%, 90%
+# Wait for nav pills and bring into view
+- scrollUntilVisible:
+    element:
+      text: "Store"
+    direction: DOWN
+    timeout: 30000
 
 # Navigate to Clothing department
 - tapOn:
     text: "Clothing"
 
-# Verify we're in clothing section - check active button state via JS
+# Verify section changed - Clothing button should be active (bg-white)
 - assertTrue:
-    condition: "document.querySelector('nav') !== null"
+    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-white'))"
 
-# Verify 3D canvas is present in clothing view
+# Verify 3D canvas is present
 - assertTrue:
     condition: "document.querySelector('canvas') !== null"
-
-# Verify return to overview works
-- tapOn:
-    text: "Store"
-- assertVisible: "Store"

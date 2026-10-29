@@ -18,25 +18,21 @@ tags: [smoke, overview]
     visible: "NIKE"
     timeout: 15000
 
-# Verify "VIRTUAL STORE" subtitle
+# Verify "VIRTUAL STORE" subtitle appears
 - assertVisible: "VIRTUAL STORE"
 
-# Verify bottom pill bar navigation - order matches original Nike store
-# Original: Store / Clothing / Caps / Bags / Shoes
+# Wait for nav pills to be rendered and bring into view
 - scrollUntilVisible:
     element:
       text: "Store"
     direction: DOWN
-    timeout: 10000
+    timeout: 30000
 
-- assertVisible: "Store"
-- assertVisible: "Clothing"
-- assertVisible: "Caps"
-- assertVisible: "Bags"
-- assertVisible: "Shoes"
+# Verify bottom nav pills are all visible via JS
+- assertTrue:
+    condition: "Array.from(document.querySelectorAll('nav button')).slice(0,5).map(b=>b.textContent.trim()).join(',') === 'Store,Clothing,Caps,Bags,Shoes'"
 
 # Verify the info (i) button is at the far right
-# Use JS assertion since icon-only element has no text
 - assertTrue:
     condition: "document.querySelector('[aria-label=\"How to explore virtual store\"]') !== null"
 
