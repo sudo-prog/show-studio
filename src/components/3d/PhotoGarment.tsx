@@ -38,20 +38,21 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
   const angularVelocity = useRef(0);
   const prevClientX = useRef(0);
 
-  // Textures for front, side, and back views
+  // Textures for front, side, and back views.
+  // CLONE each loaded texture so per-garment flipX state is isolated.
+  // Mutating the shared texture (loader.load cache) flips it for EVERY garment
+  // that uses the same URL, producing the horizontal scanline/wireframe corruption.
   const textures = useMemo(() => {
     const loader = new THREE.TextureLoader();
-    const frontTex = loader.load(getTextureUrl(product.category, product.id, 'front'));
-    const sideTex = loader.load(getTextureUrl(product.category, product.id, 'side'));
-    const backTex = loader.load(getTextureUrl(product.category, product.id, 'back'));
-
-    [frontTex, sideTex, backTex].forEach((t) => {
-      t.colorSpace = THREE.SRGBColorSpace;
-      t.generateMipmaps = true;
-      t.minFilter = THREE.LinearMipmapLinearFilter;
-    });
-
-    return { front: frontTex, side: sideTex, back: backTex };
+    const makeClone = (view: 'front' | 'side' | 'back') => {
+      const base = loader.load(getTextureUrl(product.category, product.id, view));
+      base.colorSpace = THREE.SRGBColorSpace;
+      base.generateMipmaps = true;
+      base.minFilter = THREE.LinearMipmapLinearFilter;
+      // Clone so flipX/flipY are per-instance, never shared.
+      return base.clone();
+    };
+    return { front: makeClone('front'), side: makeClone('side'), back: makeClone('back') };
   }, [product]);
 
   const currentAngle = useRef<number>(0);
@@ -146,10 +147,12 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
       mat.map = activeTex;
       mat.needsUpdate = true;
     }
-    // Use Three.js built-in texture.flipX to avoid modifying shared texture state
-    activeTex.flipX = pose.flipX;
-
-    cardRef.current.scale.set(pose.widthScale * (cardW / frontWidth), 1, 1);
+    // Mirror the mirrored-side view via mesh scale X = -1 (matches reference,
+    // which uses CSS scaleX(-1) / mesh scale -1). three.js Texture has NO flipX
+    // property (only flipY), so toggling it was a silent no-op causing the
+    // left-side garment to render un-mirrored / corrupted.
+    const mirror = pose.view === 'mirroredSide';
+    cardRef.current.scale.set(pose.widthScale * (cardW / frontWidth) * (mirror ? -1 : 1), 1, 1);
     cardRef.current.rotation.y = pose.tiltAngle;
 
     // Reveal label animation: springs toward 1 when revealed, decays back to 0

@@ -47,7 +47,7 @@ test('shortestAngleDiff correctly wraps angle differences', () => {
 test('getGarmentCardPose returns appropriate view and perspective tilt', () => {
   const frontPose = getGarmentCardPose(0);
   assert.equal(frontPose.view, 'front');
-  assert.equal(frontPose.flipX, false);
+  assert.equal(frontPose.mirror, false);
 
   const sidePose = getGarmentCardPose(Math.PI / 2);
   assert.equal(sidePose.view, 'side');
@@ -57,7 +57,7 @@ test('getGarmentCardPose returns appropriate view and perspective tilt', () => {
 
   const mirrorPose = getGarmentCardPose((3 * Math.PI) / 2);
   assert.equal(mirrorPose.view, 'mirroredSide');
-  assert.equal(mirrorPose.flipX, true);
+  assert.equal(mirrorPose.mirror, true);
 });
 
 test('getShoeViewKey returns correct 4-view quadrants', () => {

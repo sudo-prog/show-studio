@@ -34,16 +34,16 @@ const CapDisplayItem: React.FC<CapDisplayItemProps> = ({
 
   const textures = useMemo(() => {
     const loader = new THREE.TextureLoader();
-    const front = loader.load(getTextureUrl(product.category, product.id, 'front'));
-    const side = loader.load(getTextureUrl(product.category, product.id, 'side'));
-    const back = loader.load(getTextureUrl(product.category, product.id, 'back'));
-
-    [front, side, back].forEach((t) => {
-      t.colorSpace = THREE.SRGBColorSpace;
-      t.minFilter = THREE.LinearMipmapLinearFilter;
-    });
-
-    return { front, side, back };
+    // Clone each loaded texture so per-cap repeat/offset (mirror) state is isolated.
+    // Mutating the shared texture (loader.load cache) corrupts EVERY cap that uses
+    // the same URL, producing the horizontal scanline/wireframe glitch.
+    const makeClone = (view: 'front' | 'side' | 'back') => {
+      const base = loader.load(getTextureUrl(product.category, product.id, view));
+      base.colorSpace = THREE.SRGBColorSpace;
+      base.minFilter = THREE.LinearMipmapLinearFilter;
+      return base.clone();
+    };
+    return { front: makeClone('front'), side: makeClone('side'), back: makeClone('back') };
   }, [product]);
 
   const capW = product.views.front.size[0];
@@ -82,14 +82,14 @@ const CapDisplayItem: React.FC<CapDisplayItemProps> = ({
     const sector = Math.floor((a + Math.PI / 4) / (Math.PI / 2)) % 4;
 
     let activeTex = textures.front;
-    let flipX = false;
+    let mirror = false;
     if (sector === 1) {
       activeTex = textures.side;
     } else if (sector === 2) {
       activeTex = textures.back;
     } else if (sector === 3) {
       activeTex = textures.side;
-      flipX = true;
+      mirror = true;
     }
 
     const mat = cardRef.current.material as THREE.MeshBasicMaterial;
@@ -98,14 +98,9 @@ const CapDisplayItem: React.FC<CapDisplayItemProps> = ({
       mat.needsUpdate = true;
     }
 
-    if (flipX) {
-      activeTex.repeat.x = -1;
-      activeTex.offset.x = 1;
-    } else {
-      activeTex.repeat.x = 1;
-      activeTex.offset.x = 0;
-    }
-
+    // Mirror the side view via mesh scale X = -1 (matches reference). Mutating
+    // texture.repeat.x/offset.x on the shared texture corrupts all caps.
+    cardRef.current.scale.set(mirror ? -1 : 1, 1, 1);
     cardRef.current.rotation.y = currentAngle.current;
   });
 

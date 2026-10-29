@@ -80,7 +80,7 @@ export function getGarmentCardPose(angleRad: number): {
   view: PhotoViewKey;
   widthScale: number;
   tiltAngle: number;
-  flipX: boolean;
+  mirror: boolean;
 } {
   // Normalize angle to [0, 2PI)
   let a = angleRad % (Math.PI * 2);
@@ -95,7 +95,7 @@ export function getGarmentCardPose(angleRad: number): {
   const sector = Math.floor((a + quarter / 2) / quarter) % 4;
 
   let view: PhotoViewKey = 'front';
-  let flipX = false;
+  let mirror = false;
 
   if (sector === 0) {
     view = 'front';
@@ -105,7 +105,7 @@ export function getGarmentCardPose(angleRad: number): {
     view = 'back';
   } else {
     view = 'mirroredSide';
-    flipX = true;
+    mirror = true;
   }
 
   // Calculate angle offset from the nearest main view
@@ -127,7 +127,7 @@ export function getGarmentCardPose(angleRad: number): {
     view,
     widthScale,
     tiltAngle,
-    flipX,
+    mirror,
   };
 }
 
