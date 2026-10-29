@@ -12,7 +12,10 @@ export const ClothingRack: React.FC = () => {
     [inventory]
   );
 
+  // hoveredIndex: proximity hover via invisible zone (slides neighbors)
+  // tappedIndex: first-tap reveal state — second tap on the SAME item opens modal
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [tappedIndex, setTappedIndex] = useState<number | null>(null);
 
   // Rail dimensions
   const railLength = 3.0; // meters
@@ -27,7 +30,7 @@ export const ClothingRack: React.FC = () => {
     return garments.map((_, i) => startX + i * spacing);
   }, [garments, startX, spacing]);
 
-  // Compute slide offsets
+  // Compute slide offsets (driven by proximity hover)
   const slideOffsets = useMemo(() => {
     const hoveredWidth = hoveredIndex !== null ? garments[hoveredIndex]?.views.front.size[0] || 0.62 : 0.62;
     return calculateRackOffsets(garments.length, hoveredIndex, hoveredWidth, spacing);
@@ -117,19 +120,24 @@ export const ClothingRack: React.FC = () => {
           slideOffset={slideOffsets[idx]}
           isHovered={hoveredIndex === idx}
           isOpened={selectedProduct?.id === product.id}
+          isRevealed={tappedIndex === idx}
           onSelect={() => {
-            // First tap / hover centers & turns it
-            if (hoveredIndex !== idx) {
-              setHoveredIndex(idx);
-            }
+            // First tap / proximity hover: center & reveal this garment's info
+            setHoveredIndex(idx);
+            // Reset reveal state for any previously tapped item so each starts fresh
+            setTappedIndex((prev) => (prev === idx ? prev : idx));
           }}
           onClick={() => {
-            // Second tap or direct click opens it
-            if (hoveredIndex === idx) {
+            // Two-tap interaction (matches reference virtualstore.bildyard.com):
+            // - First tap on an item: reveal its info label (no modal)
+            // - Second tap on the SAME item: open the product modal
+            if (tappedIndex === idx) {
               openProduct(product);
+              setTappedIndex(null);
             } else {
+              // First tap: reveal this item
               setHoveredIndex(idx);
-              openProduct(product);
+              setTappedIndex(idx);
             }
           }}
         />
@@ -142,8 +150,14 @@ export const ClothingRack: React.FC = () => {
         onPointerLeave={handlePointerLeave}
         onClick={(e) => {
           e.stopPropagation();
+          // Two-tap via the invisible zone too: first tap reveals, second opens
           if (hoveredIndex !== null && garments[hoveredIndex]) {
-            openProduct(garments[hoveredIndex]);
+            if (tappedIndex === hoveredIndex) {
+              openProduct(garments[hoveredIndex]);
+              setTappedIndex(null);
+            } else {
+              setTappedIndex(hoveredIndex);
+            }
           }
         }}
         visible={false}

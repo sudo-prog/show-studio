@@ -1,8 +1,9 @@
 import React, { useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import { Product } from '../../types/store';
-import { damp, getGarmentCardPose, clamp, POSITION_DAMPING, ROTATION_DAMPING, HOVER_LIFT, SPRING_CONFIG } from '../../utils/math3d';
+import { damp, getGarmentCardPose, clamp, POSITION_DAMPING, ROTATION_DAMPING, HOVER_LIFT, HOVER_TURN_ANGLE, SPRING_CONFIG } from '../../utils/math3d';
 import { getTextureUrl } from '../../utils/textures';
 
 interface PhotoGarmentProps {
@@ -12,6 +13,7 @@ interface PhotoGarmentProps {
   slideOffset: number;
   isHovered: boolean;
   isOpened: boolean;
+  isRevealed: boolean;
   onClick: () => void;
   onSelect: () => void;
 }
@@ -22,6 +24,7 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
   slideOffset,
   isHovered,
   isOpened,
+  isRevealed,
   onClick,
   onSelect,
 }) => {
@@ -51,11 +54,14 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
     return { front: frontTex, side: sideTex, back: backTex };
   }, [product]);
 
-  const currentAngle = useRef<number>(-1.35);
+  const currentAngle = useRef<number>(0);
   const currentX = useRef<number>(baseX);
   const currentLift = useRef<number>(0);
   const currentSway = useRef<number>(0);
   const swayPhase = useMemo(() => Math.random() * Math.PI * 2, []);
+
+  // Reveal label opacity/lift animation
+  const revealT = useRef<number>(0);
 
   const frontWidth = product.views.front.size[0];
   const frontHeight = product.views.front.size[1];
@@ -79,7 +85,7 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
 
       // If no significant momentum, spring snap to nearest quadrant
       // The 4 quadrants: 0 (front), -PI/2 (right side), -PI (back), -3*PI/2 (left/mirrored)
-      // currentAngle starts at -1.35 ≈ -PI/2 (side view) by default
+      // currentAngle starts at 0 (front view) by default
       if (Math.abs(angularVelocity.current) < 0.001) {
         const quarter = Math.PI / 2;
         // Normalize angle to [-2PI, 0) for this garment's range
@@ -93,8 +99,8 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
         const springTarget = SPRING_CONFIG.tension * 0.8;
         currentAngle.current = damp(currentAngle.current, nearestQuad, springTarget, dt);
       } else {
-        // While momentum is active, apply gentle hover pull
-        const targetAngle = isHovered ? 0 : -1.35;
+        // While momentum is active, apply gentle hover pull toward front
+        const targetAngle = isHovered ? HOVER_TURN_ANGLE : 0;
         currentAngle.current = damp(currentAngle.current, targetAngle, ROTATION_DAMPING, dt);
       }
     }
@@ -140,6 +146,10 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
 
     cardRef.current.scale.set(pose.widthScale * (cardW / frontWidth), 1, 1);
     cardRef.current.rotation.y = pose.tiltAngle;
+
+    // Reveal label animation: springs toward 1 when revealed, decays back to 0
+    const targetReveal = isRevealed && !isOpened ? 1 : 0;
+    revealT.current = damp(revealT.current, targetReveal, POSITION_DAMPING, dt);
   });
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
@@ -183,6 +193,11 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
 
   if (isOpened) return null;
 
+  // Price formatting
+  const price = product.price % 1 === 0
+    ? `$${product.price}`
+    : `$${product.price.toFixed(2)}`;
+
   return (
     <group ref={groupRef} position={[baseX, 0, 0]}>
       {/* Chrome Hook assembly hanging from rail */}
@@ -220,6 +235,43 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
           toneMapped={false}
         />
       </mesh>
+
+      {/* Reveal label: name + colorway + price — fades/scales up on first tap */}
+      <Html
+        position={[0, frontHeight * 0.52, 0]}
+        style={{ pointerEvents: 'none', transform: 'translate(-50%, 0)' }}
+        transform
+        occlude="blending"
+      >
+        <div
+          className="flex flex-col items-center gap-0.5 text-center transition-all duration-400 ease-out"
+          style={{
+            opacity: isRevealed && !isOpened ? 1 : 0,
+            transform: `translate(-50%, 0) translateY(${isRevealed && !isOpened ? '0' : '0.4rem'}) scale(${isRevealed && !isOpened ? 1 : 0.85})`,
+          }}
+        >
+          <span
+            className="font-medium text-stone-900"
+            style={{ fontSize: `${Math.round(frontWidth * 180)}px`, lineHeight: 1.2 }}
+          >
+            {product.name}
+          </span>
+          {product.colorway ? (
+            <span
+              className="text-xs text-stone-600"
+              style={{ fontSize: `${Math.round(frontWidth * 90)}px`, lineHeight: 1.2 }}
+            >
+              {product.colorway}
+            </span>
+          ) : null}
+          <span
+            className="font-bold text-stone-950"
+            style={{ fontSize: `${Math.round(frontWidth * 110)}px`, lineHeight: 1.2 }}
+          >
+            {price}
+          </span>
+        </div>
+      </Html>
     </group>
   );
 };

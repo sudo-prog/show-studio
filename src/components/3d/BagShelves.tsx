@@ -144,7 +144,7 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
     e.stopPropagation();
     const deltaX = e.clientX - dragStartX.current;
     currentAngle.current = dragStartAngle.current + deltaX * 0.015;
-    // Track velocity for momentum
+    // Track velocity for momentum (pixels per frame → angular velocity)
     const deltaDelta = e.clientX - prevClientX.current;
     angularVelocity.current = -deltaDelta * 0.015 * 0.06;
     prevClientX.current = e.clientX;
@@ -168,7 +168,7 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
         </mesh>
       )}
 
-      {/* Wall Hook for Crossbody Bags (hung from apex) */}
+      {/* Wall Hook for Crossbody Bags (hung from strap apex) */}
       {isCrossbody && (
         <group position={[0, 0, -0.02]}>
           <mesh position={[0, 0, 0.02]} rotation={[Math.PI / 2, 0, 0]}>
@@ -250,11 +250,11 @@ export const BagShelves: React.FC = () => {
         })}
       </group>
 
-      {/* Oak 3 x 2 Cubby Unit (Build Prompt 5) */}
+      {/* 6 Standing Bags on a 3D Platform with Depth */}
       <group position={[0, -0.35, 0.25]}>
-        {/* Outer Frame */}
-        <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
-          <boxGeometry args={[2.4, 0.9, 0.42]} />
+        {/* Platform base: raised plinth with depth */}
+        <mesh position={[0, -0.28, 0.15]} castShadow receiveShadow>
+          <boxGeometry args={[2.4, 0.3, 0.5]} />
           <meshStandardMaterial
             color={brandSettings.woodColor || '#b58c5c'}
             roughness={0.65}
@@ -262,24 +262,37 @@ export const BagShelves: React.FC = () => {
           />
         </mesh>
 
-        {/* 6 Hollow Cubby Insets */}
+        {/* Platform top surface */}
+        <mesh position={[0, -0.12, 0.38]} receiveShadow>
+          <boxGeometry args={[2.4, 0.06, 0.22]} />
+          <meshStandardMaterial color="#e8e5de" roughness={0.3} metalness={0.1} />
+        </mesh>
+
+        {/* 6 Standing Bags in cubby niches with 3D depth */}
         {standingBags.map((product, idx) => {
           const col = (idx % 3) - 1; // -1, 0, 1
-          const row = Math.floor(idx / 3) === 0 ? 0.55 : 0.15; // upper / lower tier
+          const row = Math.floor(idx / 3) === 0 ? 0.5 : 0.1;
           const cubbyX = col * 0.74;
+          const bagW = product.views.front.size[0];
 
           return (
-            <group key={product.id} position={[cubbyX, row, 0.05]}>
-              {/* Cubby inner cavity cutout backdrop */}
-              <mesh position={[0, 0, -0.02]} receiveShadow>
-                <boxGeometry args={[0.68, 0.36, 0.38]} />
+            <group key={product.id} position={[cubbyX, row, 0.12]}>
+              {/* Cubby recess: deeper niche with back panel for 3D depth */}
+              <mesh position={[0, 0, -0.08]} receiveShadow>
+                <boxGeometry args={[0.66, 0.34, 0.42]} />
                 <meshStandardMaterial color="#1f1e24" roughness={0.9} />
+              </mesh>
+
+              {/* 3D plinth base under the bag */}
+              <mesh position={[0, -0.08, 0.01]} castShadow receiveShadow>
+                <boxGeometry args={[bagW * 0.9, 0.04, bagW * 0.6]} />
+                <meshStandardMaterial color="#374151" roughness={0.4} metalness={0.3} />
               </mesh>
 
               {/* Standing Product inside cubby */}
               <BagDisplayItem
                 product={product}
-                position={[0, -0.17, 0.12]}
+                position={[0, -0.04, 0.04]}
                 isCrossbody={false}
                 isOpened={selectedProduct?.id === product.id}
                 onOpen={() => openProduct(product)}

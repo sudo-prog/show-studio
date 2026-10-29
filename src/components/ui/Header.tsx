@@ -1,10 +1,10 @@
 import React from 'react';
-import { ShoppingBag, Sliders, Store } from './icons';
+import { ShoppingBag, Store } from './icons';
 import { useStore } from '../../context/StoreContext';
 import { useCart } from '../../context/CartContext';
 
 export const Header: React.FC = () => {
-  const { brandSettings, setIsCustomizerOpen, setActiveSection } = useStore();
+  const { brandSettings, setActiveSection } = useStore();
   const { totals, isCartBouncing, setIsCartOpen } = useCart();
 
   const isNike = brandSettings.brandName.toUpperCase() === 'NIKE';
@@ -23,7 +23,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between pointer-events-none transition-all">
-      {/* Left: Quick Overview Link & Merchant Customizer trigger */}
+      {/* Left: 360° Overview Link */}
       <div className="flex items-center gap-2 pointer-events-auto">
         <button
           onClick={() => setActiveSection('store')}
@@ -32,16 +32,6 @@ export const Header: React.FC = () => {
         >
           <Store className="w-3.5 h-3.5 text-stone-600" />
           <span className="hidden sm:inline">360° Overview</span>
-        </button>
-
-        <button
-          onClick={() => setIsCustomizerOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-900/85 hover:bg-stone-950 text-white text-xs font-medium shadow-md backdrop-blur-md transition-all active:scale-95 cursor-pointer"
-          title="Merchant Customization Studio: Brand Name, Colors, Currency, Catalog"
-        >
-          <Sliders className="w-3.5 h-3.5 text-amber-300" />
-          <span className="hidden sm:inline">Brand Studio</span>
-          <span className="sm:hidden">Brand</span>
         </button>
       </div>
 

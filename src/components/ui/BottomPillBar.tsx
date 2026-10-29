@@ -19,7 +19,7 @@ export const BottomPillBar: React.FC = () => {
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[95vw] pointer-events-auto">
       <nav
         aria-label="Department navigation"
-        className="flex items-center gap-1 sm:gap-1.5 p-1.5 rounded-full bg-stone-900/90 hover:bg-stone-900 backdrop-blur-xl shadow-2xl border border-stone-800/80 transition-all text-stone-300"
+        className="flex items-center gap-1 sm:gap-1.5 p-1.5 rounded-full bg-white/80 hover:bg-white text-stone-400 shadow-sm backdrop-blur-xl border border-stone-200/60 transition-all"
       >
         {navItems.map((item) => {
           const isActive = activeSection === item.id;
@@ -31,23 +31,23 @@ export const BottomPillBar: React.FC = () => {
               onClick={() => setActiveSection(item.id)}
               className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? 'bg-white text-stone-950 shadow-md font-semibold scale-100'
-                  : 'hover:text-white hover:bg-white/10 text-stone-300'
+                  ? 'bg-stone-900 text-white shadow font-semibold'
+                  : 'hover:text-stone-900 hover:bg-stone-100/60 text-stone-500'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-stone-950' : 'text-stone-400'}`} />
+              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-stone-600'}`} />
               <span className="text-[11px] sm:text-xs">{item.label}</span>
             </button>
           );
         })}
 
         {/* Divider */}
-        <div className="w-[1px] h-4 bg-stone-700/80 mx-1" />
+        <div className="w-[1px] h-4 bg-stone-300/60 mx-1" />
 
         {/* Info button (i) */}
         <button
           onClick={() => setIsInfoModalOpen(true)}
-          className="p-2 rounded-full hover:bg-white/15 text-stone-300 hover:text-white transition-all cursor-pointer"
+          className="p-2 rounded-full hover:bg-stone-100/60 text-stone-500 hover:text-stone-800 transition-all cursor-pointer"
           aria-label="How to explore virtual store"
           title="How to explore"
         >
