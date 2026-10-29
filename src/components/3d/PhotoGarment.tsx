@@ -86,7 +86,10 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
       // If no significant momentum, spring snap to nearest quadrant
       // The 4 quadrants: 0 (front), -PI/2 (right side), -PI (back), -3*PI/2 (left/mirrored)
       // currentAngle starts at 0 (front view) by default
-      if (Math.abs(angularVelocity.current) < 0.001) {
+      if (Math.abs(angularVelocity.current) < 0.001 && Math.abs(currentAngle.current) < 0.001) {
+        // Already at rest at front — keep it there
+        currentAngle.current = 0;
+      } else if (Math.abs(angularVelocity.current) < 0.001) {
         const quarter = Math.PI / 2;
         // Normalize angle to [-2PI, 0) for this garment's range
         let angle = currentAngle.current % (Math.PI * 4);
@@ -95,9 +98,17 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
         let nearestQuad = Math.round(angle / quarter) * quarter;
         // Clamp to valid range [-2*PI, 0]
         nearestQuad = clamp(nearestQuad, -Math.PI * 2, 0);
-        // Spring snap to nearest quadrant using SPRING_CONFIG
-        const springTarget = SPRING_CONFIG.tension * 0.8;
-        currentAngle.current = damp(currentAngle.current, nearestQuad, springTarget, dt);
+        // Only snap if we're close to a quadrant (within 10 degrees)
+        // Otherwise, spring back toward 0 (front) for stability
+        const snapThreshold = 0.17; // ~10 degrees
+        if (Math.abs(currentAngle.current - nearestQuad) < snapThreshold) {
+          // Spring snap to nearest quadrant using SPRING_CONFIG
+          const springTarget = SPRING_CONFIG.tension * 0.8;
+          currentAngle.current = damp(currentAngle.current, nearestQuad, springTarget, dt);
+        } else {
+          // Spring back to front (0) for stability
+          currentAngle.current = damp(currentAngle.current, 0, ROTATION_DAMPING * 0.5, dt);
+        }
       } else {
         // While momentum is active, apply gentle hover pull toward front
         const targetAngle = isHovered ? HOVER_TURN_ANGLE : 0;
