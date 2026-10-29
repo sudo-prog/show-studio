@@ -25,11 +25,15 @@ tags: [touch, momentum, snap]
 - tapOn:
     text: "Clothing"
 
-# Wait for section to load
+# Wait for section to load - Clothing button should be active (bg-stone-900 = dark on light nav)
 - assertTrue:
-    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-white'))"
+    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-stone-900'))"
 
-# Tap on a product to open modal
+# Tap on a product to reveal (first tap = hover/reveal)
+- tapOn:
+    point: 50%, 45%
+
+# Second tap opens modal (two-tap interaction matches reference)
 - tapOn:
     point: 50%, 45%
 

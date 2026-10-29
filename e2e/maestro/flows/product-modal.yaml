@@ -26,12 +26,19 @@ tags: [product, modal]
 - tapOn:
     text: "Clothing"
 
-# Wait for section to load - verify active navigation
+# Wait for section to load - verify active navigation (bg-stone-900 = dark on light nav)
 - assertTrue:
-    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-white'))"
+    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-stone-900'))"
 
-# Tap on center of canvas to open a product
-# Clothing rack is centered, tap near center
+# Tap on center of canvas to reveal product (first tap = hover/reveal)
+- tapOn:
+    point: 50%, 45%
+
+# Wait for reveal
+- sleep:
+    seconds: 1
+
+# Second tap on same product opens modal (two-tap interaction matches reference)
 - tapOn:
     point: 50%, 45%
 

@@ -26,9 +26,9 @@ tags: [clothing, department]
 - tapOn:
     text: "Clothing"
 
-# Verify section changed - Clothing button should be active (bg-white)
+# Verify section changed - Clothing button should be active (bg-stone-900 = dark on light nav)
 - assertTrue:
-    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-white'))"
+    condition: "Array.from(document.querySelectorAll('nav button')).some(b => b.textContent.trim() === 'Clothing' && b.classList.contains('bg-stone-900'))"
 
 # Verify 3D canvas is present
 - assertTrue:

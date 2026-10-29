@@ -135,14 +135,8 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
       mat.map = activeTex;
       mat.needsUpdate = true;
     }
-
-    if (pose.flipX) {
-      activeTex.repeat.x = -1;
-      activeTex.offset.x = 1;
-    } else {
-      activeTex.repeat.x = 1;
-      activeTex.offset.x = 0;
-    }
+    // Use Three.js built-in texture.flipX to avoid modifying shared texture state
+    activeTex.flipX = pose.flipX;
 
     cardRef.current.scale.set(pose.widthScale * (cardW / frontWidth), 1, 1);
     cardRef.current.rotation.y = pose.tiltAngle;
@@ -241,7 +235,8 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
         position={[0, frontHeight * 0.52, 0]}
         style={{ pointerEvents: 'none', transform: 'translate(-50%, 0)' }}
         transform
-        occlude="blending"
+        occlude={false}
+        distanceFactor={10}
       >
         <div
           className="flex flex-col items-center gap-0.5 text-center transition-all duration-400 ease-out"
