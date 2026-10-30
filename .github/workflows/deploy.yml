@@ -51,7 +51,7 @@ jobs:
           path: dist
 
       - name: Deploy to Vercel
-        run: npx vercel@latest --prod \
+        run: npx vercel@latest --prod --prebuilt \
           --project=show-studio \
           --token=${{ secrets.VERCEL_TOKEN }} \
           --yes
@@ -73,7 +73,7 @@ jobs:
           path: dist
 
       - name: Deploy to Vercel (preview)
-        run: npx vercel@latest -t ${{ secrets.VERCEL_TOKEN }} --yes
+        run: npx vercel@latest -t ${{ secrets.VERCEL_TOKEN }} --prebuilt --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
