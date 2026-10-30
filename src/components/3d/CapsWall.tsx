@@ -40,7 +40,8 @@ const CapDisplayItem: React.FC<CapDisplayItemProps> = ({
     const makeClone = (view: 'front' | 'side' | 'back') => {
       const base = loader.load(getTextureUrl(product.category, product.id, view));
       base.colorSpace = THREE.SRGBColorSpace;
-      base.minFilter = THREE.LinearMipmapLinearFilter;
+      base.generateMipmaps = false;
+      base.minFilter = THREE.LinearFilter;
       return base.clone();
     };
     return { front: makeClone('front'), side: makeClone('side'), back: makeClone('back') };

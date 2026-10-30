@@ -20,6 +20,7 @@ interface PhotoGarmentProps {
 
 export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
   product,
+  index,
   baseX,
   slideOffset,
   isHovered,
@@ -47,8 +48,10 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
     const makeClone = (view: 'front' | 'side' | 'back') => {
       const base = loader.load(getTextureUrl(product.category, product.id, view));
       base.colorSpace = THREE.SRGBColorSpace;
-      base.generateMipmaps = true;
-      base.minFilter = THREE.LinearMipmapLinearFilter;
+      // NPOT textures (e.g. 839x1024) cannot have mipmaps in WebGL.
+      // generateMipmaps + LinearMipmapLinearFilter produces diagonal grid artifacts.
+      base.generateMipmaps = false;
+      base.minFilter = THREE.LinearFilter;
       // Clone so flipX/flipY are per-instance, never shared.
       return base.clone();
     };
@@ -221,9 +224,16 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
       </group>
 
       {/* Garment Studio Card (faces camera & responsive to touch/pointer drag) */}
+      {/*
+        Subtle Z offset by index prevents z-fighting between adjacent garment
+        planes. Without this, coplanar textured quads at the same Z cause
+        diagonal grid/aliasing artifacts when they slightly overlap due to
+        sway animation and tilt. Center garments are affected most because
+        they have neighbors on both sides.
+      */}
       <mesh
         ref={cardRef}
-        position={[0, 0, 0]}
+        position={[0, 0, index * 0.0005]}
         castShadow
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

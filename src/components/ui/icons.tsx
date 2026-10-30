@@ -115,7 +115,7 @@ export const Info: React.FC<IconProps> = ({ className, style }) => (
 export const Compass: React.FC<IconProps> = ({ className, style }) => (
   <svg {...iconBase} className={className} style={style}>
     <circle cx="12" cy="12" r="10" />
-    <polygon points="16.24 7.51 11 12.76 11 7.51 16.24 7.51z" />
+    <polygon points="12 2 4 20 11 14 12 14 19 20" />
     <line x1="12" y1="15" x2="12" y2="15" />
   </svg>
 );

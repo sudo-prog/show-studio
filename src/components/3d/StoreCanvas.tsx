@@ -16,12 +16,18 @@ export const StoreCanvas: React.FC = () => {
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none touch-none">
       <Canvas
         camera={{ position: [0, 0.25, 0.6], fov: 55 }}
-        shadows="soft"
+        shadows
         dpr={[1, 2]}
         gl={{
           toneMapping: THREE.ACESFilmicToneMapping,
           antialias: true,
           powerPreference: 'high-performance',
+        }}
+        onCreated={(state) => {
+          // three.js r186 removed PCFSoftShadowMap; R3F defaults to it when
+          // shadows is true, producing a console warning. Explicitly set
+          // PCFShadowMap to suppress it.
+          state.gl.shadowMap.type = THREE.PCFShadowMap;
         }}
       >
         <Suspense fallback={null}>

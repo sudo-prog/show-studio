@@ -43,7 +43,10 @@ const ShoeDisplayItem: React.FC<ShoeDisplayItemProps> = ({
 
     [outer, inner, toe, heel].forEach((t) => {
       t.colorSpace = THREE.SRGBColorSpace;
-      t.minFilter = THREE.LinearMipmapLinearFilter;
+      // NPOT textures cannot have mipmaps in WebGL — LinearMipmapLinearFilter
+      // produces diagonal grid artifacts on this hardware.
+      t.generateMipmaps = false;
+      t.minFilter = THREE.LinearFilter;
     });
 
     return { outer, inner, toe, heel };
