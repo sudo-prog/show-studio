@@ -26,54 +26,55 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Type check
+        run: pnpm lint
+
       - name: Build show-studio
         run: pnpm build
         env:
           NODE_ENV: "production"
 
-      - name: Upload build artifact
+      - name: Upload build artifact (for manual deploy if needed)
         uses: actions/upload-artifact@v4
         with:
           name: show-studio-dist
           path: dist
           retention-days: 1
 
-  deploy-production:
+  deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: show-studio-dist
-          path: dist
+          node-version: 20
 
-      - name: Deploy to Vercel
-        run: npx vercel@latest --prod --prebuilt \
-          --project=show-studio \
-          --token=${{ secrets.VERCEL_TOKEN }} \
-          --yes
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # Two-step deploy: Vercel build produces .vercel/output/ from the
+      # project's build command (vite build via vercel.json config).
+      # Then vercel deploy --prebuilt deploys ONLY from .vercel/output/,
+      # avoiding the "Can't deploy more than one path" error.
+      - name: Vercel build
+        run: npx vercel@latest build --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_GIT_COMMIT_SHA: ${{ github.sha }}
+          VERCEL_GIT_COMMIT_REF: ${{ github.ref_name }}
+          VERCEL_GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          VERCEL_GIT_REPO_OWNER: ${{ github.repository_owner }}
+          VERCEL_GIT_REPO_NAME: show-studio
 
-  deploy-preview:
-    runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: show-studio-dist
-          path: dist
-
-      - name: Deploy to Vercel (preview)
-        run: npx vercel@latest -t ${{ secrets.VERCEL_TOKEN }} --prebuilt --yes
+      - name: Deploy to Vercel (production)
+        run: npx vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
