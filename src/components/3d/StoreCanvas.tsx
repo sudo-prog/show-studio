@@ -13,7 +13,7 @@ export const StoreCanvas: React.FC = () => {
   const { brandSettings } = useStore();
 
   return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden select-none touch-none">
+    <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
       <Canvas
         camera={{ position: [0, 0.25, 0.6], fov: 55 }}
         shadows
