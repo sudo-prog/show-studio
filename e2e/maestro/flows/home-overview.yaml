@@ -40,9 +40,9 @@ tags: [smoke, overview]
 - assertTrue:
     condition: "document.querySelector('button') !== null"
 
-# Verify 3D canvas container with touch-none class
+# Verify 3D canvas is present (touch-action: none only on canvas, not wrapper)
 - assertTrue:
-    condition: "document.querySelector('.touch-none') !== null"
+    condition: "document.querySelector('canvas') !== null"
 
 # Verify shopping cart button has id
 - assertTrue:
