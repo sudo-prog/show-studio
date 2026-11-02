@@ -99,22 +99,22 @@ export const RoomScene: React.FC = () => {
       {/* Apparel Sign (Back Wall) */}
       <group position={[0, 1.75, -3.48]}>
         <Text
-          fontSize={0.24}
-          letterSpacing={0.18}
+          fontSize={0.13}
+          letterSpacing={0.06}
           color="#18181b"
           fillOpacity={letteringOpacity.current}
           anchorX="center"
           anchorY="middle"
         >
-          COLLECTION / APPAREL
+          NIKE
         </Text>
       </group>
 
       {/* Footwear Sign (Right Wall) */}
       <group position={[3.48, 1.75, 0]} rotation={[0, -Math.PI / 2, 0]}>
         <Text
-          fontSize={0.24}
-          letterSpacing={0.18}
+          fontSize={0.13}
+          letterSpacing={0.06}
           color="#18181b"
           fillOpacity={letteringOpacity.current}
           anchorX="center"
@@ -127,8 +127,8 @@ export const RoomScene: React.FC = () => {
       {/* Bags Sign (Front Wall) */}
       <group position={[0, 1.75, 3.48]} rotation={[0, Math.PI, 0]}>
         <Text
-          fontSize={0.24}
-          letterSpacing={0.18}
+          fontSize={0.13}
+          letterSpacing={0.06}
           color="#18181b"
           fillOpacity={letteringOpacity.current}
           anchorX="center"
@@ -141,8 +141,8 @@ export const RoomScene: React.FC = () => {
       {/* Caps Sign (Left Wall) */}
       <group position={[-3.48, 1.75, 0]} rotation={[0, Math.PI / 2, 0]}>
         <Text
-          fontSize={0.24}
-          letterSpacing={0.18}
+          fontSize={0.13}
+          letterSpacing={0.06}
           color="#18181b"
           fillOpacity={letteringOpacity.current}
           anchorX="center"

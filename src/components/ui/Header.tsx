@@ -36,7 +36,7 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Center: Brand Wordmark (Iconic Nike lockup matching virtualstore.bildyard.com or custom merchant) */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-4 sm:top-5 flex flex-col items-center pointer-events-auto text-center">
+      <div className="absolute left-1/2 -translate-x-1/2 top-3 sm:top-4 flex flex-col items-center pointer-events-auto text-center">
         <button
           onClick={() => setActiveSection('store')}
           className="group flex flex-col items-center transition-transform hover:scale-[1.02] cursor-pointer"

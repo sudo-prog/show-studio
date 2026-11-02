@@ -31,7 +31,7 @@ const BRAND_STORAGE_KEY = 'virtual_store_brand_v1';
 const INVENTORY_STORAGE_KEY = 'virtual_store_inventory_v1';
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [activeSection, setActiveSection] = useState<SectionId>('clothing');
+  const [activeSection, setActiveSection] = useState<SectionId>('store');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);

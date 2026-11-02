@@ -9,6 +9,10 @@
   .touch-none {
     touch-action: none;
   }
+  /* Bottom nav safe-area: keep the pill bar clear of the iPhone home indicator */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 @keyframes shake {

@@ -21,7 +21,7 @@ const VirtualStoreApp: React.FC = () => {
 
   return (
     <div
-      className="relative w-screen h-screen overflow-hidden select-none"
+      className="fixed inset-0 w-full h-full overflow-hidden select-none"
       style={{ backgroundColor: brandSettings.floorColor || '#e8e5de' }}
     >
       {/* 3D Scene Viewport */}

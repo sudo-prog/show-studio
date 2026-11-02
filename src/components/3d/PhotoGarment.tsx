@@ -257,6 +257,8 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
       {/* Reveal label: name + colorway + price — fades/scales up on first tap */}
       <Html
         position={[0, frontHeight * 0.52, 0]}
+        pointerEvents="none"
+        zIndexRange={[10, 0]}
         style={{ pointerEvents: 'none', transform: 'translate(-50%, 0)' }}
         transform
         occlude={false}
