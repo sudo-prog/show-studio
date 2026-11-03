@@ -33,14 +33,14 @@ export const RoomScene: React.FC = () => {
   // performance (a few thousand tiny meshes would kill the frame rate).
   const pegHoles = useMemo(() => {
     const holes: { x: number; y: number }[] = [];
-    const spacing = 0.055;
-    const cols = 42;
-    const rows = 38;
+    const spacing = 0.085;
+    const cols = 86;
+    const rows = 76;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         holes.push({
-          x: -3.5 + c * spacing + (r % 2 ? spacing / 2 : 0),
-          y: -1.8 + r * spacing,
+          x: -3.6 + c * spacing + (r % 2 ? spacing / 2 : 0),
+          y: -1.95 + r * spacing,
         });
       }
     }
@@ -63,13 +63,13 @@ export const RoomScene: React.FC = () => {
 
     return (
       <instancedMesh ref={ref} args={[undefined, undefined, pegHoles.length]} position={position} rotation={rotation}>
-        <circleGeometry args={[0.006, 8]} />
-        <meshBasicMaterial color="#d8d4ca" transparent opacity={0.18} />
+        <circleGeometry args={[0.015, 8]} />
+        <meshBasicMaterial color="#c6c0b3" transparent opacity={0.6} />
       </instancedMesh>
     );
   };
 
-  const wallColor = brandSettings.wallColor || '#e4e2dc';
+  const wallColor = brandSettings.wallColor || '#ded6c5';
   const floorColor = brandSettings.floorColor || '#e8e5de';
 
   return (
@@ -83,7 +83,7 @@ export const RoomScene: React.FC = () => {
       {/* Floor - coloured as wall so no visible seam in section views */}
 <mesh position={[0, -2.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
   <planeGeometry args={[10.0, 10.0]} />
-  <meshBasicMaterial color="#e4e2dc" />
+  <meshBasicMaterial color="#ded6c5" />
 </mesh>
       <PegGrid position={[0, 0, -3.49]} />
       {/* 2. Front Wall (Z = 3.5, Bags section) */}
@@ -164,9 +164,9 @@ export const RoomScene: React.FC = () => {
       </group>
 
       {/* BIG NIKE WALL LOGO (back wall) */}
-      <group position={[-0.05, 1.49, -3.47]}>
+      <group position={[-0.05, 2.4, -3.47]}>
         <Text
-              fontSize={0.43}
+              fontSize={0.62}
               color="#111111"
               anchorX="center"
               anchorY="middle"

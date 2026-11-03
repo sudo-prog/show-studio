@@ -8,9 +8,9 @@ import { calculateRackOffsets } from '../../utils/math3d';
 export const ClothingRack: React.FC = () => {
   const { inventory, selectedProduct, openProduct, activeSection } = useStore();
   const isOverview = activeSection === 'store';
-  const count = isOverview ? 8 : 6;
-  const spacing = isOverview ? 0.75 : 0.85;
-  const railLength = isOverview ? 6.0 : 4.5;
+  const count = isOverview ? 10 : 6;
+  const spacing = isOverview ? 0.52 : 0.85;
+  const railLength = isOverview ? 5.2 : 4.5;
   const garments = useMemo(
     () => inventory.filter((p) => p.category === 'clothing').slice(0, count),
     [inventory, count]
@@ -22,7 +22,7 @@ export const ClothingRack: React.FC = () => {
   const [tappedIndex, setTappedIndex] = useState<number | null>(null);
 
   // Rail dimensions
-  const railY = 0.68; // height in world coords
+  const railY = 0.95; // height in world coords
   const railZ = -3.2; // meters
   const wallZ = -3.48; // wall bracket depth
 
@@ -104,7 +104,7 @@ export const ClothingRack: React.FC = () => {
 
       {/* Garments on Rail */}
       {garments.map((product, idx) => (
-        <group key={product.id} scale={[isOverview ? 0.85 : 0.9, 2.1, 1]} position={[basePositions[idx], -0.42, 0]}>
+        <group key={product.id} scale={[isOverview ? 0.72 : 0.9, 2.1, 1]} position={[basePositions[idx], -0.42, 0]}>
           <PhotoGarment
             product={product}
             index={idx}

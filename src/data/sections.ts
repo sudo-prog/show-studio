@@ -6,7 +6,7 @@ export const SECTIONS: Record<SectionId, SectionConfig> = {
     label: 'Overview',
     origin: [0, 0, 0],
     rotationY: 0,
-    fitWidth: 6.2,
+    fitWidth: 4.8,
     lookY: 0.35,
     wallSign: '',
     description: 'Explore the full showroom 360°',

@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
           Close
         </button>
       ) : (
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className="hidden">
           <button
             onClick={() => setActiveSection('store')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/70 hover:bg-white text-stone-800 text-xs font-medium shadow-sm backdrop-blur-md border border-stone-200/60 transition-all active:scale-95 cursor-pointer"
@@ -47,7 +47,7 @@ export const Header: React.FC = () => {
       )}
 
       {/* Center: Brand Wordmark (Iconic Nike lockup matching virtualstore.bildyard.com or custom merchant) */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-16 sm:top-20 flex flex-col items-center pointer-events-auto text-center">
+      <div className="absolute left-1/2 -translate-x-1/2 top-3 sm:top-4 flex flex-col items-center pointer-events-auto text-center">
         <button
           onClick={() => setActiveSection('store')}
           className="group flex flex-col items-center transition-transform hover:scale-[1.02] cursor-pointer"
