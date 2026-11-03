@@ -10,7 +10,7 @@ import { BagShelves } from './BagShelves';
 import { useStore } from '../../context/StoreContext';
 
 export const StoreCanvas: React.FC = () => {
-  const { brandSettings } = useStore();
+  const { brandSettings, activeSection } = useStore();
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
@@ -36,7 +36,11 @@ export const StoreCanvas: React.FC = () => {
           <ClothingRack />
           <ShoeWall />
           <CapsWall />
-          <BagShelves />
+          {/* The overview camera sits behind the front wall, so the solid
+              bag-shelf panels would render from their back faces and fill the
+              frame with brown. The reference overview shows only the back wall,
+              so hide the shelves while in the Store overview. */}
+          {activeSection !== 'store' && <BagShelves />}
         </Suspense>
       </Canvas>
     </div>
