@@ -1,5 +1,4 @@
 import React from 'react';
-import { Info, Compass, Shirt, Footprints, Briefcase, GraduationCap } from './icons';
 import { useStore } from '../../context/StoreContext';
 import { SectionId } from '../../types/store';
 
@@ -7,51 +6,49 @@ export const BottomPillBar: React.FC = () => {
   const { activeSection, setActiveSection, setIsInfoModalOpen } = useStore();
 
   // Order matches original Nike Virtual Store: Store / Clothing / Caps / Bags / Shoes
-  const navItems: { id: SectionId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: 'store', label: 'Store', icon: Compass },
-    { id: 'clothing', label: 'Clothing', icon: Shirt },
-    { id: 'caps', label: 'Caps', icon: GraduationCap },
-    { id: 'bags', label: 'Bags', icon: Briefcase },
-    { id: 'shoes', label: 'Shoes', icon: Footprints },
-  ];
+  const navItems: { id: SectionId; label: string }[] = [
+  { id: 'store', label: 'Store' },
+  { id: 'clothing', label: 'Clothing' },
+  { id: 'caps', label: 'Caps' },
+  { id: 'bags', label: 'Bags' },
+  { id: 'shoes', label: 'Shoes' },
+];
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[calc(100vw-16px)] pointer-events-auto">
+    <div className="fixed bottom-3 left-0 right-0 z-40 pointer-events-none flex justify-center px-3">
       <nav
         aria-label="Department navigation"
-        className="flex items-center gap-0.5 sm:gap-1.5 p-1.5 rounded-full whitespace-nowrap bg-white/80 hover:bg-white text-stone-400 shadow-sm backdrop-blur-xl border border-stone-200/60 transition-all"
+        className="pointer-events-auto flex items-center gap-1 px-1 py-1 rounded-full whitespace-nowrap bg-white/70 hover:bg-white text-stone-400 shadow-sm backdrop-blur-xl border border-stone-200/60 transition-all"
       >
         {navItems.map((item) => {
           const isActive = activeSection === item.id;
-          const Icon = item.icon;
 
           return (
             <button
               key={item.id}
               onClick={() => setActiveSection(item.id)}
-              className={`relative flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-[10px] sm:text-xs font-medium transition-all duration-200 cursor-pointer ${
+              className={`relative flex items-center justify-center px-2 py-1 rounded-full text-[13px] font-medium leading-none transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'bg-stone-900 text-white shadow font-semibold'
                   : 'hover:text-stone-900 hover:bg-stone-100/60 text-stone-500'
               }`}
             >
-              <Icon className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isActive ? 'text-white' : 'text-stone-600'}`} />
-              <span className="text-[10px] sm:text-xs">{item.label}</span>
+              <span>{item.label}</span>
             </button>
           );
         })}
 
         {/* Divider */}
-        <div className="w-[1px] h-4 bg-stone-300/60 mx-1" />
+        <div className="w-px h-4 bg-stone-300/60 mx-2" />
 
         {/* Info button (i) */}
         <button
           onClick={() => setIsInfoModalOpen(true)}
-          className="p-2 rounded-full hover:bg-stone-100/60 text-stone-500 hover:text-stone-800 transition-all cursor-pointer"
+          className="w-[30px] h-[30px] text-[13px] font-medium italic rounded-full hover:bg-stone-100/60 text-stone-500 hover:text-stone-800 transition-all cursor-pointer"
           aria-label="How to explore virtual store"
           title="How to explore"
         >
-          <Info className="w-4 h-4" />
+          i
         </button>
       </nav>
     </div>

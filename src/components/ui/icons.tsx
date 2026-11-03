@@ -53,12 +53,32 @@ export const Sparkles: React.FC<IconProps> = ({ className, style }) => (
 );
 
 export const ShoppingBag: React.FC<IconProps> = ({ className, style }) => (
-  <svg {...iconBase} className={className} style={style}>
-    <path d="M16 17v2a2 2 0 0 0 2 2h2" />
-    <path d="M2 2h16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
-    <path d="M9 7V4a3 3 0 0 1 6 0v3" />
-    <path d="M8 7h8" />
-    <path d="M12 7v10" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 28 28"
+    aria-hidden="true"
+    className={className}
+    style={style}
+  >
+    <path
+      d="M13 7.5h11l-.9 13.2a1.3 1.3 0 0 1-1.3 1.2h-2.3M16 7.5V6a2.5 2.5 0 0 1 5 0v1.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path d="M3.5 11h14l-1 13.3a1.4 1.4 0 0 1-1.4 1.3H5.9a1.4 1.4 0 0 1-1.4-1.3L3.5 11z" fill="currentColor" />
+    <path
+      d="M7.3 13.5v-3.3a3.2 3.2 0 0 1 6.4 0v3.3"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="7.3" cy="13.6" r="0.9" fill="currentColor" />
+    <circle cx="18.5" cy="10.2" r="0.9" fill="currentColor" />
   </svg>
 );
 

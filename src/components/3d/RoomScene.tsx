@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
@@ -9,6 +9,18 @@ export const RoomScene: React.FC = () => {
   const { brandSettings, selectedProduct } = useStore();
   const letteringOpacity = useRef(0.85);
 
+  // FIX A: Nike swoosh shape for CLOTHING sign only
+  const swooshShape = useMemo(() => {
+    const s = new THREE.Shape();
+    s.moveTo(-0.30, -0.02);
+    s.quadraticCurveTo(-0.05, 0.06, 0.14, 0.10);
+    s.quadraticCurveTo(0.02, 0.02, -0.26, -0.06);
+    s.closePath();
+    const g = new THREE.ShapeGeometry(s, 32);
+    g.computeVertexNormals();
+    return g;
+  }, []);
+
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
     // Build Prompt 8: fade wall lettering when a product is open
@@ -16,140 +28,156 @@ export const RoomScene: React.FC = () => {
     letteringOpacity.current = damp(letteringOpacity.current, targetOpacity, 6.0, dt);
   });
 
+  // Pegboard dot grid: the reference wall is covered in a regular grid of
+  // small recessed holes. Rendered as one InstancedMesh per wall for
+  // performance (a few thousand tiny meshes would kill the frame rate).
+  const pegHoles = useMemo(() => {
+    const holes: { x: number; y: number }[] = [];
+    const spacing = 0.055;
+    const cols = 42;
+    const rows = 38;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        holes.push({
+          x: -3.5 + c * spacing + (r % 2 ? spacing / 2 : 0),
+          y: -1.8 + r * spacing,
+        });
+      }
+    }
+    return holes;
+  }, []);
+
+  const PegGrid: React.FC<{ position: [number, number, number]; rotation?: [number, number, number] }> = ({ position, rotation }) => {
+    const ref = useRef<THREE.InstancedMesh>(null);
+    const dummy = useMemo(() => new THREE.Object3D(), []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      pegHoles.forEach((h, i) => {
+        dummy.position.set(h.x, h.y, 0.012);
+        dummy.updateMatrix();
+        ref.current!.setMatrixAt(i, dummy.matrix);
+      });
+      ref.current!.instanceMatrix.needsUpdate = true;
+    }, [dummy, pegHoles]);
+
+    return (
+      <instancedMesh ref={ref} args={[undefined, undefined, pegHoles.length]} position={position} rotation={rotation}>
+        <circleGeometry args={[0.006, 8]} />
+        <meshBasicMaterial color="#d8d4ca" transparent opacity={0.18} />
+      </instancedMesh>
+    );
+  };
+
   const wallColor = brandSettings.wallColor || '#e4e2dc';
   const floorColor = brandSettings.floorColor || '#e8e5de';
 
   return (
     <group>
-      {/* ----------------- FLOOR ----------------- */}
-      {/* Polished studio concrete floor with smooth sheen */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]} receiveShadow>
-        <planeGeometry args={[7.2, 7.2]} />
-        <meshStandardMaterial
-          color={floorColor}
-          roughness={0.28}
-          metalness={0.12}
-        />
-      </mesh>
-
-      {/* ----------------- CEILING ----------------- */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 2.6, 0]}>
-        <planeGeometry args={[7.2, 7.2]} />
-        <meshStandardMaterial color="#f5f5f4" roughness={0.9} />
-      </mesh>
-
-      {/* Modern recessed linear ceiling light strips */}
-      {[-2, 0, 2].map((z, idx) => (
-        <group key={idx} position={[0, 2.58, z]}>
-          <mesh>
-            <boxGeometry args={[5, 0.04, 0.12]} />
-            <meshStandardMaterial
-              color="#ffffff"
-              emissive="#ffffff"
-              emissiveIntensity={1.0}
-              roughness={0.3}
-              metalness={0.7}
-            />
-          </mesh>
-          <pointLight color="#fff7ed" intensity={3.5} distance={5} />
-        </group>
-      ))}
-
       {/* ----------------- 4 ROOM WALLS (7m x 7m) ----------------- */}
       {/* 1. Back Wall (Z = -3.5, Apparel section) */}
-      <mesh position={[0, 0.8, -3.52]} receiveShadow>
-        <planeGeometry args={[7.2, 3.6]} />
+      <mesh position={[0, 1.2, -3.52]} receiveShadow>
+        <planeGeometry args={[7.2, 6.4]} />
         <meshStandardMaterial color={wallColor} roughness={0.85} />
       </mesh>
+      {/* Floor - coloured as wall so no visible seam in section views */}
+<mesh position={[0, -2.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+  <planeGeometry args={[10.0, 10.0]} />
+  <meshBasicMaterial color="#e4e2dc" />
+</mesh>
+      <PegGrid position={[0, 0, -3.49]} />
       {/* 2. Front Wall (Z = 3.5, Bags section) */}
-      <mesh position={[0, 0.8, 3.52]} rotation={[0, Math.PI, 0]} receiveShadow>
-        <planeGeometry args={[7.2, 3.6]} />
+      <mesh position={[0, 1.2, 3.52]} rotation={[0, Math.PI, 0]} receiveShadow>
+        <planeGeometry args={[7.2, 6.4]} />
         <meshStandardMaterial color={wallColor} roughness={0.85} />
       </mesh>
       {/* 3. Right Wall (X = 3.5, Shoes section) */}
-      <mesh position={[3.52, 0.8, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
-        <planeGeometry args={[7.2, 3.6]} />
+      <mesh position={[3.52, 1.2, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[7.2, 6.4]} />
         <meshStandardMaterial color={wallColor} roughness={0.85} />
       </mesh>
+
+      {/* No peg grid on shoes wall - reference has smooth cream */}
       {/* 4. Left Wall (X = -3.5, Caps section) */}
-      <mesh position={[-3.52, 0.8, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
-        <planeGeometry args={[7.2, 3.6]} />
+      <mesh position={[-3.52, 1.2, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[7.2, 6.4]} />
         <meshStandardMaterial color={wallColor} roughness={0.85} />
       </mesh>
+      <PegGrid position={[-3.49, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
 
-      {/* Baseboards (Perimeter trim) */}
-      <mesh position={[0, -0.96, -3.49]}>
-        <boxGeometry args={[7.0, 0.08, 0.03]} />
-        <meshStandardMaterial color="#d6d3d1" roughness={0.6} />
-      </mesh>
-      <mesh position={[0, -0.96, 3.49]}>
-        <boxGeometry args={[7.0, 0.08, 0.03]} />
-        <meshStandardMaterial color="#d6d3d1" roughness={0.6} />
-      </mesh>
-      <mesh position={[3.49, -0.96, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <boxGeometry args={[7.0, 0.08, 0.03]} />
-        <meshStandardMaterial color="#d6d3d1" roughness={0.6} />
-      </mesh>
-      <mesh position={[-3.49, -0.96, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <boxGeometry args={[7.0, 0.08, 0.03]} />
-        <meshStandardMaterial color="#d6d3d1" roughness={0.6} />
-      </mesh>
-
-      {/* ----------------- WALL DEPARTMENT LETTERING (Build Prompt 8) ----------------- */}
-      {/* Apparel Sign (Back Wall) */}
-      <group position={[0, 1.75, -3.48]}>
+      {/* Shoes Sign — suspended black board with chains */}
+      <group position={[3.43, 2.0, -0.01]} rotation={[0, -Math.PI / 2, 0]}>
+        {/* Chains */}
+        <mesh position={[-0.58, 0.17, 0]}>
+          <cylinderGeometry args={[0.007, 0.007, 0.30, 8]} />
+          <meshStandardMaterial color="#52525b" metalness={0.9} roughness={0.35} />
+        </mesh>
+        <mesh position={[0.58, 0.17, 0]}>
+          <cylinderGeometry args={[0.007, 0.007, 0.30, 8]} />
+          <meshStandardMaterial color="#52525b" metalness={0.9} roughness={0.35} />
+        </mesh>
+        {/* Board */}
+        <mesh castShadow>
+          <boxGeometry args={[1.072, 0.32, 0.04]} />
+          <meshStandardMaterial color="#18181b" roughness={0.55} metalness={0.15} />
+        </mesh>
         <Text
-          fontSize={0.13}
-          letterSpacing={0.06}
-          color="#18181b"
+          fontSize={0.142}
+          letterSpacing={0.04}
+          color="#fafaf9"
           fillOpacity={letteringOpacity.current}
           anchorX="center"
           anchorY="middle"
+          position={[0, 0, 0.03]}
         >
-          NIKE
+          SHOES
         </Text>
       </group>
 
-      {/* Footwear Sign (Right Wall) */}
-      <group position={[3.48, 1.75, 0]} rotation={[0, -Math.PI / 2, 0]}>
+      {/* Caps Sign — suspended black board with chains */}
+      <group position={[-3.43, 2.32, 0]} rotation={[0, Math.PI / 2, 0]}>
+        {/* Chains */}
+        <mesh position={[-0.66, 0.17, 0]}>
+          <cylinderGeometry args={[0.007, 0.007, 0.30, 8]} />
+          <meshStandardMaterial color="#52525b" metalness={0.9} roughness={0.35} />
+        </mesh>
+        <mesh position={[0.66, 0.17, 0]}>
+          <cylinderGeometry args={[0.007, 0.007, 0.30, 8]} />
+          <meshStandardMaterial color="#52525b" metalness={0.9} roughness={0.35} />
+        </mesh>
+        {/* Board */}
+        <mesh castShadow>
+          <boxGeometry args={[1.218, 0.32, 0.04]} />
+          <meshStandardMaterial color="#18181b" roughness={0.55} metalness={0.15} />
+        </mesh>
         <Text
-          fontSize={0.13}
-          letterSpacing={0.06}
-          color="#18181b"
+          fontSize={0.161}
+          letterSpacing={0.04}
+          color="#fafaf9"
           fillOpacity={letteringOpacity.current}
           anchorX="center"
           anchorY="middle"
+          position={[0, 0, 0.03]}
         >
-          FOOTWEAR STUDIO
+          CAPS
         </Text>
       </group>
 
-      {/* Bags Sign (Front Wall) */}
-      <group position={[0, 1.75, 3.48]} rotation={[0, Math.PI, 0]}>
+      {/* BIG NIKE WALL LOGO (back wall) */}
+      <group position={[-0.05, 1.49, -3.47]}>
         <Text
-          fontSize={0.13}
-          letterSpacing={0.06}
-          color="#18181b"
-          fillOpacity={letteringOpacity.current}
-          anchorX="center"
-          anchorY="middle"
-        >
-          BAGS & UTILITY
-        </Text>
-      </group>
-
-      {/* Caps Sign (Left Wall) */}
-      <group position={[-3.48, 1.75, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <Text
-          fontSize={0.13}
-          letterSpacing={0.06}
-          color="#18181b"
-          fillOpacity={letteringOpacity.current}
-          anchorX="center"
-          anchorY="middle"
-        >
-          HEADWEAR ARCHIVE
-        </Text>
+              fontSize={0.43}
+              color="#111111"
+              anchorX="center"
+              anchorY="middle"
+              letterSpacing={0.08}
+              fontWeight={700}
+            >
+              NIKE
+            </Text>
+        <mesh geometry={swooshShape} position={[0.62, 0.0, 0.01]} scale={[1.55, 1.55, 1.55]}>
+          <meshBasicMaterial color="#111111" />
+        </mesh>
       </group>
 
       {/* Framed Architectural Posters on corner walls */}
@@ -176,17 +204,19 @@ export const RoomScene: React.FC = () => {
       </group>
 
       {/* Ambient and Fill Lighting */}
-      <ambientLight intensity={1.2} color="#fbfbfa" />
+      <ambientLight intensity={2.8} color="#fafafa" />
       <directionalLight
         position={[2, 3, 2]}
-        intensity={1.4}
+        intensity={1.0}
         color="#ffffff"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.0001}
       />
-      <directionalLight position={[-2, 3, -2]} intensity={0.8} color="#fef3c7" />
+      <directionalLight position={[-2, 3, -2]} intensity={0.8} color="#f0f0f0" />
+      {/* Bottom fill to prevent dark wall base */}
+      <directionalLight position={[0, -2, 0]} intensity={0.6} color="#fafafa" />
     </group>
   );
 };

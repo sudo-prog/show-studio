@@ -207,7 +207,7 @@ export const ProductModal: React.FC = () => {
       />
 
       {/* Main modal container */}
-      <div className="relative z-10 w-full h-full max-w-6xl max-h-[92vh] flex flex-col md:flex-row items-center justify-between p-4 sm:p-8 overflow-hidden pointer-events-auto">
+      <div className="relative z-10 w-full h-full max-w-6xl max-h-[92vh] flex flex-col md:flex-row items-end md:items-center justify-between p-0 md:p-8 overflow-hidden pointer-events-auto">
         {/* Close Button top-right */}
         <button
           onClick={closeProduct}
@@ -220,7 +220,7 @@ export const ProductModal: React.FC = () => {
         {/* ----------------- LEFT AREA: 3D Product & Interactive Turn Stage ----------------- */}
         <div className="relative flex-1 w-full h-[52vh] md:h-full flex flex-col md:flex-row items-center justify-center">
           {/* View Thumbnails (Left side on desktop, top strip on mobile) */}
-          <div className="absolute top-2 left-2 md:static md:mr-6 flex flex-row md:flex-col gap-2 z-20">
+          <div className="absolute bottom-[calc(42vh+12px)] left-1/2 -translate-x-1/2 md:static md:translate-x-0 md:mr-6 flex flex-row md:flex-col gap-2 z-20">
             {availableViews.map((v) => {
               const isCurrent = Math.abs(currentAngle - v.angle) % (Math.PI * 2) < 0.35;
               return (
@@ -231,7 +231,7 @@ export const ProductModal: React.FC = () => {
                     angularVelocity.current = 0;
                     stopMomentum();
                   }}
-                  className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl p-1 bg-white/70 hover:bg-white border transition-all cursor-pointer flex items-center justify-center overflow-hidden shadow-sm ${
+                  className={`w-[52px] h-[52px] rounded-full p-1 bg-white/70 hover:bg-white border transition-all cursor-pointer flex items-center justify-center overflow-hidden shadow-sm ${
                     isCurrent ? 'border-stone-900 ring-2 ring-stone-900/20 scale-105' : 'border-stone-200/80'
                   }`}
                   title={`View ${v.label}`}
@@ -293,7 +293,7 @@ export const ProductModal: React.FC = () => {
         </div>
 
         {/* ----------------- RIGHT AREA: Frosted Product Card (Build Prompt 6 & 8) ----------------- */}
-        <div className="w-full md:w-[380px] shrink-0 bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl rounded-3xl p-6 sm:p-8 flex flex-col justify-between max-h-[46vh] md:max-h-full overflow-y-auto">
+        <div className="w-full md:w-[380px] shrink-0 bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl rounded-t-3xl md:rounded-3xl p-5 sm:p-8 flex flex-col justify-between max-h-[42vh] md:max-h-full overflow-y-auto mt-auto md:mt-0 md:self-center md:rounded-3xl">
           <div>
             {/* Category & Stock */}
             <div className="flex items-center justify-between text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">
@@ -336,7 +336,7 @@ export const ProductModal: React.FC = () => {
                 <span className="text-[11px] text-stone-400">Standard fit</span>
               </div>
 
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-6 gap-1.5">
                 {selectedProduct.sizes.map((size) => {
                   const isSoldOut = selectedProduct.soldOutSizes.includes(size);
                   const isSelected = selectedSize === size;

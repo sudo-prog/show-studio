@@ -134,14 +134,14 @@ const CapDisplayItem: React.FC<CapDisplayItemProps> = ({
   if (isOpened) return null;
 
   return (
-    <group ref={groupRef} position={position}>
+    <group ref={groupRef} position={position} scale={1.88}>
       {/* Chrome Hook: small wall plate below brim and thin rod angled up into crown (PDF spec) */}
-      <mesh position={[0, -0.06, 0.02]} castShadow>
+      <mesh position={[0, -0.06, 0.02]}>
         <boxGeometry args={[0.03, 0.04, 0.006]} />
         <meshStandardMaterial color="#9ca3af" metalness={0.9} roughness={0.2} />
       </mesh>
       {/* Angled display arm */}
-      <mesh position={[0, -0.01, 0.07]} rotation={[0.4, 0, 0]} castShadow>
+      <mesh position={[0, -0.01, 0.07]} rotation={[0.4, 0, 0]}>
         <cylinderGeometry args={[0.004, 0.004, 0.12, 16]} />
         <meshStandardMaterial color="#d1d5db" metalness={0.95} roughness={0.15} />
       </mesh>
@@ -155,7 +155,6 @@ const CapDisplayItem: React.FC<CapDisplayItemProps> = ({
       <mesh
         ref={cardRef}
         position={[0, 0, 0.12]}
-        castShadow
         onPointerOver={(e) => {
           e.stopPropagation();
           setIsHovered(true);
@@ -194,27 +193,51 @@ export const CapsWall: React.FC = () => {
 
   // Left wall: X = -3.45, faces inward: rotY = PI/2
   const wallX = -3.45;
-  const colSpacing = 0.58; // 4 columns
+  const colSpacing = 1.05; // 2 columns visible, wider spacing
   const rowSpacing = 0.55; // 2 rows
+
+  const pegDots = useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 256;
+    const g = c.getContext('2d')!;
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#fff';
+    for (let y = 16; y < 256; y += 16) {
+      for (let x = 16; x < 256; x += 16) {
+        g.beginPath();
+        g.arc(x, y, 1.6, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(4, 2);
+    return t;
+  }, []);
 
   return (
     <group position={[wallX, 0.35, 0]} rotation={[0, Math.PI / 2, 0]}>
       {/* Birch Pegboard Backdrop */}
-      <mesh position={[0, 0, -0.03]} receiveShadow>
-        <boxGeometry args={[2.6, 1.5, 0.03]} />
+      <mesh position={[0, -0.36, -0.03]} receiveShadow>
+        <planeGeometry args={[3.4, 1.7]} />
         <meshStandardMaterial
-          color={brandSettings.woodColor ? '#e8d8be' : '#e6d5bc'}
+          color={brandSettings.woodColor ? '#c9a97e' : '#c9a97e'}
           roughness={0.7}
           metalness={0.02}
         />
+      </mesh>
+      <mesh position={[0, -0.36, -0.014]}>
+        <planeGeometry args={[3.4, 1.7]} />
+        <meshBasicMaterial color="#b59468" transparent alphaMap={pegDots} opacity={0.5} depthWrite={false} />
       </mesh>
 
       {/* 2x4 Grid of Cap Hooks and Products */}
       {caps.map((product, index) => {
         const col = (index % 4) - 1.5; // -1.5, -0.5, 0.5, 1.5
-        const row = Math.floor(index / 4) === 0 ? 0.32 : -0.28;
+        const row = Math.floor(index / 4) === 0 ? 0.02 : -0.60;
 
-        const posX = col * colSpacing;
+        const posX = col * colSpacing - 0.05;
         const posY = row;
 
         return (

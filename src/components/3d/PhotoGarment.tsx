@@ -59,7 +59,7 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
   }, [product]);
 
   const currentAngle = useRef<number>(0);
-  const currentX = useRef<number>(baseX);
+  const currentX = useRef<number>(0);
   const currentLift = useRef<number>(0);
   const currentSway = useRef<number>(0);
   const swayPhase = useMemo(() => Math.random() * Math.PI * 2, []);
@@ -120,7 +120,7 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
       }
     }
 
-    const targetX = baseX + slideOffset;
+    const targetX = slideOffset;
     currentX.current = damp(currentX.current, targetX, POSITION_DAMPING + 1, dt);
     groupRef.current.position.x = currentX.current;
 
@@ -210,7 +210,7 @@ export const PhotoGarment: React.FC<PhotoGarmentProps> = ({
     : `$${product.price.toFixed(2)}`;
 
   return (
-    <group ref={groupRef} position={[baseX, 0, 0]}>
+    <group ref={groupRef} position={[0, 0, 0]}>
       {/* Chrome Hook assembly hanging from rail */}
       <group ref={hookRef} position={[0, frontHeight * 0.48, 0]}>
         <mesh position={[0, 0.05, 0]}>

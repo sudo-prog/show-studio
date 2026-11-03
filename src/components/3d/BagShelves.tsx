@@ -64,8 +64,8 @@ const BagDisplayItem: React.FC<BagDisplayItemProps> = ({
     return new THREE.CanvasTexture(canvas);
   }, []);
 
-  const bagW = product.views.front.size[0];
-  const bagH = product.views.front.size[1];
+  const bagW = product.views.front.size[0] * 0.55;
+  const bagH = product.views.front.size[1] * 0.55;
 
   useFrame((_, delta) => {
     if (!groupRef.current || !cardRef.current) return;
@@ -217,7 +217,17 @@ export const BagShelves: React.FC = () => {
   const { inventory, selectedProduct, openProduct, brandSettings } = useStore();
 
   const crossbodies = useMemo(
-    () => inventory.filter((p) => p.productType === 'bag-crossbody').slice(0, 4),
+    () => inventory.filter((p) => p.productType === 'bag-crossbody')
+      .sort((a, b) => {
+        const colorA = (a as any).color || '';
+        const colorB = (b as any).color || '';
+        const aIsPink = colorA.toLowerCase().includes('rose') || colorA.toLowerCase().includes('pink') || a.name.toLowerCase().includes('rose') || a.name.toLowerCase().includes('pink');
+        const bIsPink = colorB.toLowerCase().includes('rose') || colorB.toLowerCase().includes('pink') || b.name.toLowerCase().includes('rose') || b.name.toLowerCase().includes('pink');
+        if (aIsPink && !bIsPink) return -1;
+        if (!aIsPink && bIsPink) return 1;
+        return 0;
+      })
+      .slice(0, 2),
     [inventory]
   );
   const standingBags = useMemo(
@@ -230,10 +240,12 @@ export const BagShelves: React.FC = () => {
 
   return (
     <group position={[0, 0.25, wallZ]} rotation={[0, Math.PI, 0]}>
+      {/* Warm fill light for bags wall */}
+      <directionalLight position={[0, 2, -1]} intensity={0.3} color="#fafafa" />
       {/* 4 Crossbody Bags on Wall Hooks above the cubby unit */}
-      <group position={[0, 0.85, 0]}>
+      <group position={[0, 1.05, 0]}>
         {crossbodies.map((product, idx) => {
-          const x = (idx - 1.5) * 0.62;
+          const x = (idx - 0.5) * 0.85;
           return (
             <BagDisplayItem
               key={product.id}
@@ -248,44 +260,52 @@ export const BagShelves: React.FC = () => {
       </group>
 
       {/* 6 Standing Bags on a 3D Platform with Depth */}
-      <group position={[0, -0.35, 0.25]}>
-        {/* Platform base: raised plinth with depth */}
-        <mesh position={[0, -0.28, 0.15]} castShadow receiveShadow>
-          <boxGeometry args={[2.4, 0.3, 0.5]} />
-          <meshStandardMaterial
-            color={brandSettings.woodColor || '#b58c5c'}
-            roughness={0.65}
-            metalness={0.05}
-          />
+      <group position={[0, -1.43, 0.25]}>
+        {/* Dark brown back panel behind everything */}
+        <mesh position={[0, 0.30, 0.0]} receiveShadow>
+          <boxGeometry args={[2.4, 2.5, 0.04]} />
+          <meshStandardMaterial color="#8a6a48" roughness={0.9} />
         </mesh>
 
-        {/* Platform top surface */}
-        <mesh position={[0, -0.12, 0.38]} receiveShadow>
-          <boxGeometry args={[2.4, 0.06, 0.22]} />
-          <meshStandardMaterial color="#e8e5de" roughness={0.3} metalness={0.1} />
+        {/* Back panel (dark recess behind the unit) */}
+        <mesh position={[0, 0.30, 0.1]} receiveShadow>
+          <boxGeometry args={[2.4, 2.5, 0.05]} />
+          <meshStandardMaterial color="#8a6a48" roughness={0.9} />
         </mesh>
 
-        {/* 6 Standing Bags in cubby niches with 3D depth */}
+        {/* Shelf slabs - 3 horizontal shelves at local y = -0.9, -0.1, 0.7 (cells 0.8 tall) */}
+        {[-0.9, -0.1, 0.7].map((rowY, i) => (
+          <mesh position={[0, rowY, 0.16]} key={i}>
+            <boxGeometry args={[2.4, 0.20, 0.45]} />
+            <meshStandardMaterial color="#d4b890" roughness={0.7} />
+          </mesh>
+        ))}
+
+        {/* Vertical dividers - 3 at x = -0.8, 0, 0.8 (2 columns of 0.8 width), centred at y = -0.5 spanning both rows */}
+        {[-0.8, 0, 0.8].map((divX, i) => (
+          <mesh position={[divX, -0.5, 0.16]} key={`div-${i}`}>
+            <boxGeometry args={[0.24, 2.8, 0.45]} />
+            <meshStandardMaterial color="#d4b890" roughness={0.7} />
+          </mesh>
+        ))}
+
+        {/* Side frame - vertical tan posts at x = ±1.2 for outer edges */}
+        {[-1.2, 1.2].map((sideX, i) => (
+          <mesh position={[sideX, -0.5, 0.16]} key={`side-${i}`}>
+            <boxGeometry args={[0.24, 2.8, 0.45]} />
+            <meshStandardMaterial color="#d4b890" roughness={0.7} />
+          </mesh>
+        ))}
+
+        {/* 6 Standing Bags in cubby niches with 2-column grid, positions: col ±0.4, rows at y=0.35 and y=-0.45 */}
         {standingBags.map((product, idx) => {
-          const col = (idx % 3) - 1; // -1, 0, 1
-          const row = Math.floor(idx / 3) === 0 ? 0.5 : 0.1;
-          const cubbyX = col * 0.74;
+          const col = (idx % 2) - 0.5; // -0.5, 0.5 → columns at x = ±0.4
+          const row = [0.3, -0.5][Math.floor(idx / 2)]; // cell centres: top row 0.3, bottom row -0.5
+          const cubbyX = col * 0.75; // columns at x = ±0.375
           const bagW = product.views.front.size[0];
 
           return (
-            <group key={product.id} position={[cubbyX, row, 0.12]}>
-              {/* Cubby recess: deeper niche with back panel for 3D depth */}
-              <mesh position={[0, 0, -0.08]} receiveShadow>
-                <boxGeometry args={[0.66, 0.34, 0.42]} />
-                <meshStandardMaterial color="#1f1e24" roughness={0.9} />
-              </mesh>
-
-              {/* 3D plinth base under the bag */}
-              <mesh position={[0, -0.08, 0.01]} castShadow receiveShadow>
-                <boxGeometry args={[bagW * 0.9, 0.04, bagW * 0.6]} />
-                <meshStandardMaterial color="#374151" roughness={0.4} metalness={0.3} />
-              </mesh>
-
+            <group key={product.id} position={[cubbyX, row, 0.22]} scale={0.95}>
               {/* Standing Product inside cubby */}
               <BagDisplayItem
                 product={product}
@@ -298,8 +318,6 @@ export const BagShelves: React.FC = () => {
           );
         })}
       </group>
-
-      {/* Overhead Section Spotlight */}
       <spotLight
         position={[0, 1.8, 1.4]}
         target-position={[0, 0.2, 0]}

@@ -85,10 +85,10 @@ export const CameraRig: React.FC = () => {
         pitchVelocity.current = deltaY * 0.0025;
       } else {
         // Section: drag slides along tangent
-        panX.current = clamp(startPanX.current - dx * 0.0035, -1.2, 1.2);
+        panX.current = clamp(startPanX.current - dx * 0.0075, -1.2, 1.2);
 
         // Accumulate velocity for momentum
-        panVelocity.current = -deltaX * 0.003;
+        panVelocity.current = -deltaX * 0.006;
       }
     };
 
@@ -139,7 +139,7 @@ export const CameraRig: React.FC = () => {
 
     if (activeSection === 'store') {
       // ----------------- OVERVIEW RIG -----------------
-      targetPos.current.set(0, 0.25, 0.6);
+      targetPos.current.set(0, 0.7, 6.0);
 
       // Apply momentum: continue rotating after drag release
       if (!isPointerDown.current) {
@@ -158,7 +158,7 @@ export const CameraRig: React.FC = () => {
         if (Math.abs(pitchVelocity.current) < 0.0005) pitchVelocity.current = 0;
       }
 
-      const lookDist = 4.0;
+      const lookDist = 9.0;
       const cosP = Math.cos(pitch.current);
       const lookX = -Math.sin(yaw.current) * cosP * lookDist;
       const lookY = 0.35 + Math.sin(pitch.current) * lookDist;
@@ -208,10 +208,10 @@ export const CameraRig: React.FC = () => {
       }
 
       // Distance to fit display width on screen
-      const fovRad = THREE.MathUtils.degToRad(38);
+      const fovRad = THREE.MathUtils.degToRad(55);
       const halfTan = Math.tan(fovRad / 2);
-      const fitDistance = (sec.fitWidth / 2 / (halfTan * Math.max(aspect, 0.85))) * zoomLevel.current;
-      const clampedDist = clamp(fitDistance, 2.0, 4.2);
+      const fitDistance = (sec.fitWidth / 2 / (halfTan * aspect)) * zoomLevel.current;
+      const clampedDist = clamp(fitDistance, 1.2, 6.2);
 
       // Center look target with pan along tangent
       const originVec = new THREE.Vector3(...sec.origin);
@@ -226,7 +226,7 @@ export const CameraRig: React.FC = () => {
       const camPos = lookPoint
         .clone()
         .add(normal.clone().multiplyScalar(clampedDist));
-      camPos.y = clamp(sec.lookY + 0.15, -0.4, 1.8);
+      camPos.y = clamp(sec.lookY, -0.4, 1.8);
 
       targetPos.current.copy(camPos);
 

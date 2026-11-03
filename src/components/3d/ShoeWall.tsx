@@ -210,14 +210,14 @@ export const ShoeWall: React.FC = () => {
 
   // Wall position & rotation (Right wall: X = 3.48, faces inward: rotY = -PI/2)
   const wallX = 3.45;
-  const colSpacing = 0.72; // horizontal shelf distance
-  const rowSpacing = 0.52; // vertical shelf distance
+  const colSpacing = 0.90; // horizontal shelf distance
+  const rowSpacing = 0.75; // vertical shelf distance
 
   return (
     <group position={[wallX, 0.25, 0]} rotation={[0, -Math.PI / 2, 0]}>
       {/* Warm Oak Backdrop Panel */}
-      <mesh position={[0, 0.2, -0.06]} receiveShadow>
-        <boxGeometry args={[2.7, 2.1, 0.05]} />
+      <mesh position={[0, -0.26, -0.06]}>
+        <boxGeometry args={[3.4, 2.4, 0.05]} />
         <meshStandardMaterial
           color={brandSettings.woodColor || '#b58c5c'}
           roughness={0.65}
@@ -230,34 +230,26 @@ export const ShoeWall: React.FC = () => {
         const col = (index % 3) - 1; // -1, 0, 1
         const row = 1 - Math.floor(index / 3); // 1, 0, -1
 
-        const shelfX = col * colSpacing;
-        const shelfY = row * rowSpacing;
+        const shelfX = col * colSpacing - 0.32;
+        const shelfY = row * rowSpacing - 0.36;
 
         return (
-          <group key={product.id} position={[shelfX, shelfY, 0]}>
-            {/* White floating shelf with bevelled edge */}
-            <mesh position={[0, -0.015, 0.08]} castShadow receiveShadow>
-              <boxGeometry args={[0.54, 0.026, 0.28]} />
+          <group key={product.id}>
+            {/* White floating shelf plank at UNSCALED size (outside the scaled shoe group) */}
+            <mesh position={[shelfX, shelfY, 0.08]} castShadow receiveShadow>
+              <boxGeometry args={[0.68, 0.03, 0.28]} />
               <meshStandardMaterial color="#f9fafb" roughness={0.2} metalness={0.1} />
             </mesh>
 
-            {/* Shelf metal concealed bracket accents */}
-            <mesh position={[-0.18, -0.035, 0.02]}>
-              <boxGeometry args={[0.02, 0.02, 0.12]} />
-              <meshStandardMaterial color="#9ca3af" metalness={0.8} roughness={0.2} />
-            </mesh>
-            <mesh position={[0.18, -0.035, 0.02]}>
-              <boxGeometry args={[0.02, 0.02, 0.12]} />
-              <meshStandardMaterial color="#9ca3af" metalness={0.8} roughness={0.2} />
-            </mesh>
-
-            {/* Shoe Item */}
-            <ShoeDisplayItem
-              product={product}
-              position={[0, 0, 0.08]}
-              isOpened={selectedProduct?.id === product.id}
-              onOpen={() => openProduct(product)}
-            />
+            {/* Only the shoe lives inside the scale={1.85} group */}
+            <group position={[shelfX, shelfY, 0]} scale={1.2}>
+              <ShoeDisplayItem
+                product={product}
+                position={[0, 0, 0.08]}
+                isOpened={selectedProduct?.id === product.id}
+                onOpen={() => openProduct(product)}
+              />
+            </group>
           </group>
         );
       })}
