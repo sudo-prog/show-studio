@@ -5,7 +5,7 @@
   "description": "Nike Virtual Store \u2014 3D React Three Fiber e-commerce experience",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run build && vite preview --port 5173",
     "build": "vite build && cp -r mirror/. dist/",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
