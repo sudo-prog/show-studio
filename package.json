@@ -2,11 +2,11 @@
   "name": "show-studio",
   "version": "0.1.0",
   "private": true,
-  "description": "Nike Virtual Store — 3D React Three Fiber e-commerce experience",
+  "description": "Nike Virtual Store \u2014 3D React Three Fiber e-commerce experience",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && cp -r mirror/. dist/",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "test": "vitest",
